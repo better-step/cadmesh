@@ -9,3 +9,6 @@ dependencies:
   - pyyaml
   - meshplot
   - joblib
+  - h5py
+  - meshio
+  - yaml

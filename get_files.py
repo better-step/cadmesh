@@ -13,6 +13,8 @@ processed_files_path = sys.argv[4]
 # Get all files matching the pattern
 all_files = sorted(glob.glob(f"{directory}/{pattern}"))
 
+print(f"Found {len(all_files)} files matching the pattern in the directory.", file=sys.stderr)  # Debug line
+
 # The path of the lock file
 lock_file = f"{directory}/lock_file"
 
@@ -29,8 +31,12 @@ while True:
         else:
             processed_files = []
 
+        print(f"Found {len(processed_files)} already processed files.", file=sys.stderr)  # Debug line
+
         # Get the list of unassigned files
         unassigned_files = list(set(all_files) - set(processed_files))
+
+        print(f"Found {len(unassigned_files)} unassigned files.", file=sys.stderr)  # Debug line
 
         # Select 500 or fewer files for this task
         files_to_process = unassigned_files[:500]

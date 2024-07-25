@@ -107,27 +107,31 @@ def convert_data_to_hdf5(geometry_data, topology_data, stat_data, meshPath, outp
             for index, mesh_file in enumerate(
                     sorted(f for f in os.listdir(meshPath) if os.path.isfile(os.path.join(meshPath, f)))):
                 if mesh_file.endswith(".obj"):
-                    mesh = meshio.read(os.path.join(meshPath, mesh_file))
-                    points = mesh.points
-                    cells = mesh.cells
-                    cell_data = mesh.cell_data
+                    try:
+                        mesh = meshio.read(os.path.join(meshPath, mesh_file))
+                        points = mesh.points
+                        cells = mesh.cells
+                        cell_data = mesh.cell_data
 
-                    mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
-                    mesh_subgroup.create_dataset('points', data=points)
-                    for cell in cells:
-                        cell_type = cell.type
-                        cell_indices = cell.data
-                        mesh_subgroup.create_dataset(cell_type, data=cell_indices)
+                        mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
+                        mesh_subgroup.create_dataset('points', data=points)
+                        for cell in cells:
+                            cell_type = cell.type
+                            cell_indices = cell.data
+                            mesh_subgroup.create_dataset(cell_type, data=cell_indices)
 
-                    for data_key, data_value in cell_data.items():
-                        if data_key == "obj:group_ids":
-                            data_key = "group_ids"
-                        if isinstance(data_value, list):
-                            mesh_subgroup.create_dataset(data_key, data=data_value)
-                        else:
-                            subgroup = mesh_subgroup.create_group(data_key)
-                            for field_key, field_value in data_value.items():
-                                subgroup.create_dataset(field_key, data=field_value)
+                        for data_key, data_value in cell_data.items():
+                            if data_key == "obj:group_ids":
+                                data_key = "group_ids"
+                            if isinstance(data_value, list):
+                                mesh_subgroup.create_dataset(data_key, data=data_value)
+                            else:
+                                subgroup = mesh_subgroup.create_group(data_key)
+                                for field_key, field_value in data_value.items():
+                                    subgroup.create_dataset(field_key, data=field_value)
+                    except Exception as e:
+                        print(f"Error reading mesh file '{mesh_file}': {e}")
+
     except OSError as e:
         print(f"Error accessing or writing to HDF5 file: {e}")
     except Exception as e:

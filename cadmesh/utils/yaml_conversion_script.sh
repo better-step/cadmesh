@@ -24,6 +24,6 @@ FILES=($(ls -1 "$DATA_PATH"/*.stp | sed -n "$((SLURM_ARRAY_TASK_ID*100+1)),$((SL
 for FILE in "${FILES[@]}"; do
     if [[ -f "$FILE" ]]; then  # Only process if file exists
         python data_conversion.py --input "$FILE" --output "$OUTPUT_PATH" --log "$LOG_PATH"
-        # Add conversion too yaml to hdf5 here
+        # Add conversion too yaml to sample_hdf5 here
     fi
 done
