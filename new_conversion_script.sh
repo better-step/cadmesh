@@ -46,7 +46,9 @@ done
 # Get the list of files to be processed
 echo "Getting the list of files to be processed..."
 TMP_FILE_LIST="tmp_file_list_$SLURM_ARRAY_TASK_ID.txt"
-python get_files.py $SLURM_ARRAY_TASK_ID "$DATA_PATH" "*.stp" "$PROCESSED_FILES_PATH" > $TMP_FILE_LIST
+#python get_files.py $SLURM_ARRAY_TASK_ID "$DATA_PATH" "*.stp" "$PROCESSED_FILES_PATH" > $TMP_FILE_LIST
+python get_files.py $SLURM_ARRAY_TASK_ID "$DATA_PATH" "*.st[ep]" "$PROCESSED_FILES_PATH" > $TMP_FILE_LIST
+
 
 # Check if files exist
 if [ ! -s $TMP_FILE_LIST ]

@@ -132,6 +132,9 @@ def convert_data_to_hdf5(geometry_data, topology_data, stat_data, meshPath, outp
                     except Exception as e:
                         print(f"Error reading mesh file '{mesh_file}': {e}")
 
+            if mesh_group.keys() == 0:
+                print(f"No mesh files found in the directory '{meshPath}'.")
+                raise ValueError(f"No mesh files found in the directory '{meshPath}'.")
     except OSError as e:
         print(f"Error accessing or writing to HDF5 file: {e}")
     except Exception as e:
