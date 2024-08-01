@@ -39,7 +39,7 @@ while True:
         print(f"Found {len(unassigned_files)} unassigned files.", file=sys.stderr)  # Debug line
 
         # Select 500 or fewer files for this task
-        files_to_process = unassigned_files[:200]
+        files_to_process = unassigned_files[:300]
 
         # Update the list of processed files
         processed_files.extend(files_to_process)
