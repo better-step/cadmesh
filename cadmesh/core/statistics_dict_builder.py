@@ -1,5 +1,5 @@
 from OCC.Extend.TopologyUtils import TopologyExplorer, WireExplorer
-from OCC.Core.ShapeAnalysis import ShapeAnalysis_Surface
+from OCC.Core.ShapeAnalysis import ShapeAnalysis_Surface, shapeanalysis
 from OCC.Core.ShapeAnalysis import shapeanalysis_OuterWire
 from OCC.Core.ShapeAnalysis import shapeanalysis_GetFaceUVBounds
 from OCC.Core.BRep import BRep_Tool
@@ -11,11 +11,12 @@ from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
 def extract_face_stats(face, entity_mapper, prec=1e-8):
     stats = {}
     # Exact domain calculation
-    umin, umax, vmin, vmax = shapeanalysis_GetFaceUVBounds(face)
+    umin, umax, vmin, vmax = shapeanalysis.GetFaceUVBounds(face)
     stats["exact_domain"] = [umin, umax, vmin, vmax]
 
     # Outer wire
-    ow = shapeanalysis_OuterWire(face)
+    ow = shapeanalysis.OuterWire(face)
+    # ow = shapeanalysis_OuterWire(face)
     stats["outer_wire"] = entity_mapper.loop_index(ow)
 
     # 

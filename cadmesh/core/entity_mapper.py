@@ -144,7 +144,8 @@ class EntityMapper:
     # These functions are used internally to build the map
 
     def get_hash(self, ent):
-        return ent.HashCode(intmax)
+        # return ent.HashCode(intmax)
+        return hash(ent)
 
     def append_body(self, body):
         h = self.get_hash(body)

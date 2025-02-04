@@ -9,6 +9,7 @@ import os
 from joblib import Parallel, delayed
 
 
+
 from ..core.step_processor import StepProcessor
 
 @contextlib.contextmanager
@@ -45,7 +46,7 @@ def with_timeout(timeout):
     return decorator
 
 
-@with_timeout(60.0)
+# @with_timeout(60.0)
 def process_single_step(sf, output_dir, log_dir, produce_meshes=True):
     try:
         if produce_meshes:
@@ -113,7 +114,9 @@ def process_step_files(input_file_list, output_dir, log_dir):
     for sf, error_message in results:
         if error_message is None:
             success_files.append(sf)
-            model_names.append(sf[0].name)  # append only the name of the file
+            #TODO:FIX THIS
+            model_names.append(sf.name)
+            # model_names.append(sf[0].name)
         else:
             failed_files.append((sf, error_message))
 

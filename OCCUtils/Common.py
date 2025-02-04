@@ -26,8 +26,8 @@ from OCC.Core.TColgp import (TColgp_HArray1OfPnt,
                              TColgp_Array1OfPnt2d,
                              TColgp_Array1OfVec)
 from OCC.Core.TColStd import TColStd_HArray1OfBoolean
-from OCC.Core.BRepAdaptor import (BRepAdaptor_Curve, BRepAdaptor_HCurve,
-                                  BRepAdaptor_CompCurve, BRepAdaptor_HCompCurve)
+from OCC.Core.BRepAdaptor import (BRepAdaptor_Curve, BRepAdaptor_Curve,
+                                  BRepAdaptor_CompCurve, BRepAdaptor_CompCurve)
 from OCC.Core.GeomAPI import (GeomAPI_Interpolate, GeomAPI_PointsToBSpline,
                               GeomAPI_ProjectPointOnCurve)
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Trsf

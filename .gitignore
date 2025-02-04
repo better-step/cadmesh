@@ -108,3 +108,5 @@ venv.bak/
 
 # The results directory with test output in it
 results/
+.idea
+*.DS_Store

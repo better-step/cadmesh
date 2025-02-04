@@ -1,20 +1,22 @@
+import math
+
 from OCC.Core.STEPControl import STEPControl_Reader
 from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 from OCC.Core.Bnd import Bnd_Box
 from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
-from OCC.Core.BRepBndLib import brepbndlib_Add
+from OCC.Core.BRepBndLib import brepbndlib
 from OCC.Core.BRepAdaptor import BRepAdaptor_Curve, BRepAdaptor_Surface, BRepAdaptor_CompCurve, BRepAdaptor_Curve2d
 from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array2OfReal
 from OCC.Core.TColgp import TColgp_Array1OfPnt, TColgp_Array2OfPnt, TColgp_Array1OfPnt2d
 from OCC.Core.BRep import BRep_Tool
-from OCC.Core.BRepTools import breptools_UVBounds
+from OCC.Core.BRepTools import breptools
 from OCC.Extend.TopologyUtils import TopologyExplorer
 from OCC.Core.TopLoc import TopLoc_Location
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
 
-from OCC.Core.ShapeAnalysis import ShapeAnalysis_Surface
-from OCC.Core.ShapeAnalysis import shapeanalysis_OuterWire
-from OCC.Core.ShapeAnalysis import shapeanalysis_GetFaceUVBounds
+# from OCC.Core.ShapeAnalysis import ShapeAnalysis_Surface
+# from OCC.Core.ShapeAnalysis import shapeanalysisOuterWire
+# from OCC.Core.ShapeAnalysis import shapeanalysis_GetFaceUVBounds
 
 
 
@@ -143,7 +145,7 @@ def get_boundingbox(body, tol=1e-6, use_mesh=False, logger=None):
         if logger:
             logger.info("Meshing body: Done")
     try:
-        brepbndlib_Add(body, bbox, use_mesh)
+        brepbndlib.Add(body, bbox, use_mesh)
         xmin, ymin, zmin, xmax, ymax, zmax = bbox.Get()
     except:
         xmin = ymin = zmin = xmax = ymax = zmax = 0.0
@@ -294,7 +296,7 @@ def convert_surface(face):
     s_type = surf_type(surf.GetType())
     d2_feat["type"] = s_type
     _round = lambda x: round(x, 15)
-    d2_feat["trim_domain"] = list(map(_round, breptools_UVBounds(face)))
+    d2_feat["trim_domain"] = list(map(_round, breptools.UVBounds(face)))
     #print(surf.FirstUParameter(), surf.LastUParameter(), surf.FirstVParameter(), surf.LastVParameter())
     #print(d2_feat["face_domain"])
 
@@ -352,7 +354,7 @@ def convert_surface(face):
     elif s_type == "BSpline":
         c = surf.BSpline()
         _round = lambda x: round(x, 15)
-        d2_feat["trim_domain"] = list(map(_round, breptools_UVBounds(face)))
+        d2_feat["trim_domain"] = list(map(_round, breptools.UVBounds(face)))
         d2_feat["face_domain"] = list(map(_round, c.Bounds()))
         d2_feat["is_trimmed"] = d2_feat["trim_domain"] != d2_feat["face_domain"]
         #print(c.IsUPeriodic(), c.IsVPeriodic())

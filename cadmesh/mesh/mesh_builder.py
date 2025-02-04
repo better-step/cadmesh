@@ -21,7 +21,7 @@ class MeshBuilder:
     def create_surface_meshes(self, part):
         top_exp = TopologyExplorer(part, ignore_orientation=False)
         
-        mesh = BRepMesh_IncrementalMesh(part, 0.01, True, 0.1, True)
+        mesh = BRepMesh_IncrementalMesh(part, 0.1)
         #mesh.SetParallel(True)
         mesh.SetShape(part)
         mesh.Perform()
