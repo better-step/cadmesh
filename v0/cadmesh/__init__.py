@@ -50,7 +50,8 @@ def read_step_file(filename, return_as_shapes=False, verbosity=False):
                 shapes.append(step_reader.Shape(nr))  # a compound
                 #assert not shape_to_return.IsNull()
                 nr += 1
-        except:
+        except OSError as e:
+            print(f"Error: {e.strerror}")
             print("No Shape", nr)
     else:
         raise AssertionError("Error: can't read file.")

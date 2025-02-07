@@ -138,7 +138,7 @@ def get_boundingbox(body, tol=1e-6, use_mesh=False, logger=None):
         if logger:
             logger.info("Meshing body: Init")
         mesh = BRepMesh_IncrementalMesh(body, 0.01, True, 0.1, True)
-        #mesh.SetParallel(True)
+        #mesh.SetParlallel(True)
         mesh.SetShape(body)
         mesh.Perform()
         assert mesh.IsDone()
@@ -201,7 +201,7 @@ def convert_3dcurve(edge, curve_input=False):
     elif c_type == "BSpline":
         c = curve.BSpline()
         c.SetNotPeriodic()
-        #d1_feat["periodic"] = c.IsPeriodic()
+        d1_feat["periodic"] = c.IsPeriodic()
         d1_feat["rational"] = c.IsRational()
         d1_feat["closed"] = c.IsClosed()
         d1_feat["continuity"] = c.Continuity()
@@ -261,7 +261,7 @@ def convert_2dcurve(edge, surface):
     elif c_type == "BSpline":
         c = curve.BSpline()
         c.SetNotPeriodic()
-        #d1_feat["periodic"] = c.IsPeriodic()
+        d1_feat["periodic"] = c.IsPeriodic()
         d1_feat["rational"] = c.IsRational()
         d1_feat["closed"] = c.IsClosed()
         d1_feat["continuity"] = c.Continuity()
@@ -357,11 +357,15 @@ def convert_surface(face):
         d2_feat["trim_domain"] = list(map(_round, breptools.UVBounds(face)))
         d2_feat["face_domain"] = list(map(_round, c.Bounds()))
         d2_feat["is_trimmed"] = d2_feat["trim_domain"] != d2_feat["face_domain"]
+
         #print(c.IsUPeriodic(), c.IsVPeriodic())
+
+        d2_feat["u_periodic"] = c.IsUPeriodic()
+        d2_feat["v_periodic"] = c.IsVPeriodic()
+
         c.SetUNotPeriodic()
         c.SetVNotPeriodic()
-        #d2_feat["u_periodic"] = c.IsUPeriodic()
-        #d2_feat["v_periodic"] = c.IsVPeriodic()
+
         #print(d2_feat["trim_domain"], d2_feat["face_domain"])
         d2_feat["u_rational"] = c.IsURational()
         d2_feat["v_rational"] = c.IsVRational()
@@ -370,6 +374,9 @@ def convert_surface(face):
         d2_feat["continuity"] = c.Continuity()
         d2_feat["u_degree"] = c.UDegree()
         d2_feat["v_degree"] = c.VDegree()
+
+        #d2_feat["u_period"] = c.UPeriod()
+        #d2_feat["v_period"] = c.VPeriod()
 
         p = TColgp_Array2OfPnt(1, c.NbUPoles(), 1, c.NbVPoles())
         c.Poles(p)
@@ -381,14 +388,19 @@ def convert_surface(face):
             points.append(elems)
         d2_feat["poles"] = points
 
-        k = TColStd_Array1OfReal(1, c.NbUPoles() + c.UDegree() + 1)
+
+        per_offset = 1
+        # if c.IsUPeriodic():
+        #    per_offset = 2
+
+        k = TColStd_Array1OfReal(1, c.NbUPoles() + c.UDegree() + per_offset)
         c.UKnotSequence(k)
         knots = []
         for ki in range(k.Length()):
             knots.append(k.Value(ki+1))
         d2_feat["u_knots"] = knots
         per_offset = 1
-        #if c.IsVPeriodic():
+        # if c.IsVPeriodic():
         #    per_offset = 2
         #print(c.NbVPoles() + c.VDegree() + 1 + per_offset, c.IsVPeriodic())
         k = TColStd_Array1OfReal(1, c.NbVPoles() + c.VDegree() + per_offset)

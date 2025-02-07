@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - numpy
-  - pythonocc-core==7.4.0
+  - pythonocc-core
   - jupyter
   - igl
   - pyyaml

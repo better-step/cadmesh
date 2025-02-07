@@ -117,7 +117,7 @@ class GeometryDictBuilder:
             edges = top_exp.edges_from_face(face)
             for edge in edges:                  
                 expected_halfedge_index = self.entity_mapper.halfedge_index(edge)
-                #assert expected_halfedge_index not in part_2dcurves_dict
+#                assert expected_halfedge_index not in part_2dcurves_dict
                 part_2dcurves_dict[expected_halfedge_index] = convert_2dcurve(edge, face)
 
 

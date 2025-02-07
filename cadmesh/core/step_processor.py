@@ -67,7 +67,7 @@ class StepProcessor:
 
     def load_step_file(self):
         self.parts = load_parts_from_step_file(self.step_file, logger=self.logger)
-        
+
     def process_parts(self, convert=False, fix=False, write_face_obj=True, write_part_obj=True, indices=[], version="2.01"):
         if len(self.parts) == 0:
             self.logger.info("No parts loaded to process.")
@@ -112,8 +112,10 @@ class StepProcessor:
             # Extract information for part
             try:
                 topo_dict, geo_dict, meshes, stats_dict = self.__process_part(part)
-            except:
+            except Exception as e:
+                print("Error:", str(e))
                 self.logger.error("Processing part failed %i"%index)
+                self.logger.error(str(e))
                 continue
             
             topo_dicts.append(topo_dict)
@@ -139,6 +141,7 @@ class StepProcessor:
         stats_yaml = self.output_dir / f"{self.step_file.stem}_stat"
         write_dictionary_to_file(stats_yaml, {"parts": stats_dicts, "version": version}, self.data_format)
         self.logger.info("Stat dict: Done")
+
 
             
     def __process_part(self, part):
