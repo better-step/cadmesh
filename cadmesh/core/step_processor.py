@@ -15,6 +15,8 @@ import os
 import igl
 from pathlib import Path
 import logging
+import h5py
+from Hda5_Converter import *
 
 
 
@@ -60,7 +62,11 @@ class StepProcessor:
         os.makedirs(self.log_dir, exist_ok=True)
         
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%step_file.stem), formatter)
+        if step_file.stem == 'assembly':
+            log_file_name = step_file.parent.name + '_' + step_file.stem
+        else:
+            log_file_name = step_file.stem
+        logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%log_file_name), formatter)
         logger.info("Init step processing: %s"%step_file.stem)
         self.logger = logger
 
@@ -121,26 +127,54 @@ class StepProcessor:
             topo_dicts.append(topo_dict)
             geo_dicts.append(geo_dict)
             stats_dicts.append(stats_dict)
-            
-            if write_face_obj:
-                mesh_path = self.output_dir / f"{self.step_file.stem}_mesh"
-                #print(str(mesh_path), mesh_path)
-                os.makedirs(mesh_path, exist_ok=True)
-                for idx, mesh in enumerate(meshes):
-                    if len(mesh["vertices"]) > 0:
-                        igl.write_triangle_mesh("%s/%03i_%05i_mesh.obj"%(str(mesh_path), index, idx), mesh["vertices"], mesh["faces"])
-        
-        # Write out dictionary lists
-        self.logger.info("Writing dictionaries")
-        topo_yaml = self.output_dir / f"{self.step_file.stem}_topo"
-        write_dictionary_to_file(topo_yaml, {"parts": topo_dicts, "version": version}, self.data_format)
-        self.logger.info("Topo dict: Done")
-        geo_yaml = self.output_dir / f"{self.step_file.stem}_geo"
-        write_dictionary_to_file(geo_yaml, {"parts": geo_dicts, "version": version}, self.data_format)
-        self.logger.info("Geo dict: Done")
-        stats_yaml = self.output_dir / f"{self.step_file.stem}_stat"
-        write_dictionary_to_file(stats_yaml, {"parts": stats_dicts, "version": version}, self.data_format)
-        self.logger.info("Stat dict: Done")
+
+            # if write_face_obj:
+            #     mesh_path = self.output_dir / f"{self.step_file.stem}_mesh"
+            #     #print(str(mesh_path), mesh_path)
+            #     os.makedirs(mesh_path, exist_ok=True)
+            #     for idx, mesh in enumerate(meshes):
+            #         if len(mesh["vertices"]) > 0:
+            #             igl.write_triangle_mesh("%s/%03i_%05i_mesh.obj"%(str(mesh_path), index, idx), mesh["vertices"], mesh["faces"])
+
+        if self.step_file.stem == 'assembly':
+            new_file_name = f"{self.step_file.parent.name}_{self.step_file.stem}.hdf5"
+            hdf5_path = os.path.join(self.output_dir, new_file_name)
+        else:
+            hdf5_path = self.output_dir / f"{self.step_file.stem}.hdf5"
+
+        # self.logger.info("Writing dictionaries")
+        # topo_yaml = self.output_dir / f"{self.step_file.stem}_topo"
+        # write_dictionary_to_file(topo_yaml, {"parts": topo_dicts, "version": version}, self.data_format)
+        # self.logger.info("Topo dict: Done")
+        # geo_yaml = self.output_dir / f"{self.step_file.stem}_geo"
+        # write_dictionary_to_file(geo_yaml, {"parts": geo_dicts, "version": version}, self.data_format)
+        # self.logger.info("Geo dict: Done")
+        # stats_yaml = self.output_dir / f"{self.step_file.stem}_stat"
+        # write_dictionary_to_file(stats_yaml, {"parts": stats_dicts, "version": version}, self.data_format)
+        # self.logger.info("Stat dict: Done")
+
+        with h5py.File(hdf5_path, "w") as hdf5_file:
+
+            convert_dict_to_hdf5({"parts": topo_dicts, "version": version},
+                                 hdf5_file.create_group("topology"))
+            convert_dict_to_hdf5({"parts": geo_dicts, "version": version},
+                                 hdf5_file.create_group("geometry"))
+            convert_stat_to_hdf5({"parts": stats_dicts, "version": version},
+                                 hdf5_file.create_group("stat"))
+
+            mesh_group = hdf5_file.create_group('mesh')
+
+            for index, mesh in enumerate(meshes):
+                points = mesh["vertices"]
+                faces = mesh["faces"]
+                mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
+                mesh_subgroup.create_dataset('points', data=points)
+                mesh_subgroup.create_dataset('triangle', data=faces)
+                # mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
+                # mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
+                # group_ids = np.full((faces.shape[0],), -1, dtype=int)
+                # mesh_subgroup.create_dataset("group_ids", data=group_ids)
+
 
 
             

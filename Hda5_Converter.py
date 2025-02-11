@@ -53,6 +53,9 @@ def convert_dict_to_hdf5(data, group):
                 subgroup = group.create_group(key)
                 for i, item in enumerate(value):
                     subgroup.create_dataset(str(i), data=np.array(item))
+        elif isinstance(value, np.ndarray) and value.shape == (3,4):
+            array_data = value.astype(np.float64)
+            group.create_dataset(key, data=array_data)
         else:
             group.create_dataset(key, data=value)
 

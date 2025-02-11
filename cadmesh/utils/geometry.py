@@ -293,6 +293,15 @@ def convert_2dcurve(edge, surface):
 def convert_surface(face):
     d2_feat = {}
     surf = BRepAdaptor_Surface(face)
+
+    trsf = surf.Trsf()
+    transform = np.full((3, 4), None)
+    for i in range(3):
+        for j in range(4):
+            transform[i, j] = trsf.Value(i + 1, j + 1)
+    d2_feat["transform"] = transform
+
+
     s_type = surf_type(surf.GetType())
     d2_feat["type"] = s_type
     _round = lambda x: round(x, 15)
