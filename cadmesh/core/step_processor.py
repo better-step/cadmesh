@@ -62,10 +62,11 @@ class StepProcessor:
         os.makedirs(self.log_dir, exist_ok=True)
         
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        if step_file.stem == 'assembly':
-            log_file_name = step_file.parent.name + '_' + step_file.stem
-        else:
-            log_file_name = step_file.stem
+        log_file_name = step_file.stem
+        # if step_file.stem == 'assembly':
+        #     log_file_name = step_file.parent.name + '_' + step_file.stem
+        # else:
+        #     log_file_name = step_file.stem
         logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%log_file_name), formatter)
         logger.info("Init step processing: %s"%step_file.stem)
         self.logger = logger
@@ -136,11 +137,17 @@ class StepProcessor:
             #         if len(mesh["vertices"]) > 0:
             #             igl.write_triangle_mesh("%s/%03i_%05i_mesh.obj"%(str(mesh_path), index, idx), mesh["vertices"], mesh["faces"])
 
-        if self.step_file.stem == 'assembly':
-            new_file_name = f"{self.step_file.parent.name}_{self.step_file.stem}.hdf5"
-            hdf5_path = os.path.join(self.output_dir, new_file_name)
-        else:
-            hdf5_path = self.output_dir / f"{self.step_file.stem}.hdf5"
+        parent_folder_name = self.step_file.parent.name
+        new_folder_path = self.output_dir / parent_folder_name
+        new_folder_path.mkdir(parents=True, exist_ok=True)
+        hdf5_path = new_folder_path / f"{self.step_file.stem}.hdf5"
+
+
+        # if self.step_file.stem == 'assembly':
+        #     new_file_name = f"{self.step_file.parent.name}_{self.step_file.stem}.hdf5"
+        #     hdf5_path = os.path.join(self.output_dir, new_file_name)
+        # else:
+        #     hdf5_path = self.output_dir / f"{self.step_file.stem}.hdf5"
 
         # self.logger.info("Writing dictionaries")
         # topo_yaml = self.output_dir / f"{self.step_file.stem}_topo"
@@ -168,10 +175,10 @@ class StepProcessor:
                 points = mesh["vertices"]
                 faces = mesh["faces"]
                 mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
-                mesh_subgroup.create_dataset('points', data=points)
-                mesh_subgroup.create_dataset('triangle', data=faces)
-                # mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
-                # mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
+                # mesh_subgroup.create_dataset('points', data=points)
+                # mesh_subgroup.create_dataset('triangle', data=faces)
+                mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
+                mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
                 # group_ids = np.full((faces.shape[0],), -1, dtype=int)
                 # mesh_subgroup.create_dataset("group_ids", data=group_ids)
 

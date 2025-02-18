@@ -170,6 +170,13 @@ def convert_3dcurve(edge, curve_input=False):
     c_type = edge_type(curve.GetType())
     d1_feat["interval"] = [curve.FirstParameter(), curve.LastParameter()]
     d1_feat["type"] = c_type
+
+    trsf = curve.Trsf()
+    transform = np.full((3, 4), None)
+    for i in range(3):
+        for j in range(4):
+            transform[i, j] = trsf.Value(i + 1, j + 1)
+    d1_feat["transform"] = transform
     
     if c_type == "Other":
         #print("Other Curve")

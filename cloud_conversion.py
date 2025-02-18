@@ -91,6 +91,8 @@ def main():
         args = parser.parse_args()
 
         success, failed = cadmesh.utils.processing.process_step_files(args.input, args.output, args.log)
+        print(f"Successful conversions: {success}")
+        print(f"Failed conversions: {failed}")
 
         with open(args.output + 'success.txt', 'w') as f:
             for item in success:
@@ -105,4 +107,5 @@ if __name__ == "__main__":
     main()
 
 
+# find $(pwd) -type f -name "*.step" >> ~/cadmesh/files.txt
 #  python cloud_conversion.py --input files.txt --output /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/output/ --log /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/log/ --hdf5_file /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/hdf5/
