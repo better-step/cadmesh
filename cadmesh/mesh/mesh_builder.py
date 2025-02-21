@@ -18,10 +18,10 @@ class MeshBuilder:
         self.entity_mapper = entity_mapper
         self.logger = logger
         
-    def create_surface_meshes(self, part):
+    def create_surface_meshes(self, part, length):
         top_exp = TopologyExplorer(part, ignore_orientation=False)
         
-        mesh = BRepMesh_IncrementalMesh(part, 0.1)
+        mesh = BRepMesh_IncrementalMesh(part, length)
         #mesh.SetParallel(True)
         mesh.SetShape(part)
         mesh.Perform()

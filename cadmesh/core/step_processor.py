@@ -220,9 +220,14 @@ class StepProcessor:
 
         # Extract meshes
         if self.extract_meshes:
+            lenght = 0.1
+            if geo_dict and 'bbox' in geo_dict:
+                bbox = geo_dict['bbox']
+                lenght = max(bbox[3] - bbox[0], bbox[4] - bbox[1], bbox[5] - bbox[2]) * 0.1
+
             self.logger.info("Extract mesh: Init")
             mesh_builder = self.mesh_builder(entity_mapper, self.logger)
-            meshes = mesh_builder.create_surface_meshes(part)
+            meshes = mesh_builder.create_surface_meshes(part, lenght)
             self.logger.info("Extract mesh: Done")
         else:
             meshes = []

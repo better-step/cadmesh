@@ -11,8 +11,11 @@ from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
 def extract_face_stats(face, entity_mapper, prec=1e-8):
     stats = {}
     # Exact domain calculation
-    umin, umax, vmin, vmax = shapeanalysis.GetFaceUVBounds(face)
-    stats["exact_domain"] = [umin, umax, vmin, vmax]
+    try:
+        umin, umax, vmin, vmax = shapeanalysis.GetFaceUVBounds(face)
+        stats["exact_domain"] = [umin, umax, vmin, vmax]
+    except:
+        stats["exact_domain"] = []
 
     # Outer wire
     ow = shapeanalysis.OuterWire(face)
