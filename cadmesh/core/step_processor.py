@@ -62,11 +62,11 @@ class StepProcessor:
         os.makedirs(self.log_dir, exist_ok=True)
         
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        log_file_name = step_file.stem
-        # if step_file.stem == 'assembly':
-        #     log_file_name = step_file.parent.name + '_' + step_file.stem
-        # else:
-        #     log_file_name = step_file.stem
+        %log_file_name = step_file.stem
+        if step_file.stem == 'assembly':
+            log_file_name = step_file.parent.name + '_' + step_file.stem
+        else:
+            log_file_name = step_file.stem
         logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%log_file_name), formatter)
         logger.info("Init step processing: %s"%step_file.stem)
         self.logger = logger
@@ -138,9 +138,11 @@ class StepProcessor:
             #             igl.write_triangle_mesh("%s/%03i_%05i_mesh.obj"%(str(mesh_path), index, idx), mesh["vertices"], mesh["faces"])
 
         parent_folder_name = self.step_file.parent.name
-        new_folder_path = self.output_dir / parent_folder_name
+        grandparent_folder_name = self.step_file.parent.parent.name
+
+        new_folder_path = self.output_dir / grandparent_folder_name/parent_folder_name
         new_folder_path.mkdir(parents=True, exist_ok=True)
-        hdf5_path = new_folder_path / f"{self.step_file.stem}.hdf5"
+        hdf5_path = self.output_dir / grandparent_folder_name / parent_folder_name / f"{self.step_file.stem}.hdf5"
 
 
         # if self.step_file.stem == 'assembly':
