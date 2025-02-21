@@ -11,7 +11,6 @@ import tempfile
 import multiprocessing
 import subprocess
 from tqdm import tqdm
-from memory_profiler import profile
 
 def process_files(success_files, models_folder, output_folder, batch_id, job_id):
     successful_conversions = []
@@ -106,6 +105,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-# find $(pwd) -type f -name "*.step" >> ~/cadmesh/files.txt
-#  python cloud_conversion.py --input files.txt --output /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/output/ --log /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/log/ --hdf5_file /media/nafiseh/5f43a9e1-ea28-46ea-ab14-42040d28983d/data/steps/hdf5/
