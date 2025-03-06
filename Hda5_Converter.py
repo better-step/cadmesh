@@ -78,7 +78,8 @@ def convert_stat_to_hdf5(data, group):
                 for i, inner_list in enumerate(value):
                     subgroup_1 = subgroup.create_group('part_' + str(i + 1).zfill(3))
                     for j, item in enumerate(inner_list):
-                        convert_stat_to_hdf5(item, subgroup_1.create_group(str(j).zfill(3)))
+                        if not item is None:
+                            convert_stat_to_hdf5(item, subgroup_1.create_group(str(j).zfill(3)))
             else:
                 subgroup = group.create_group(key)
                 for i, item in enumerate(value):

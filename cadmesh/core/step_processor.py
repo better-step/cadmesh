@@ -62,7 +62,7 @@ class StepProcessor:
         os.makedirs(self.log_dir, exist_ok=True)
         
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        %log_file_name = step_file.stem
+        log_file_name = step_file.stem
         if step_file.stem == 'assembly':
             log_file_name = step_file.parent.name + '_' + step_file.stem
         else:

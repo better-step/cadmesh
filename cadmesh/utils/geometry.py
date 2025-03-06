@@ -13,6 +13,7 @@ from OCC.Core.BRepTools import breptools
 from OCC.Extend.TopologyUtils import TopologyExplorer
 from OCC.Core.TopLoc import TopLoc_Location
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
+from OCC.Core.Adaptor3d import Adaptor3d_Surface
 
 # from OCC.Core.ShapeAnalysis import ShapeAnalysis_Surface
 # from OCC.Core.ShapeAnalysis import shapeanalysisOuterWire
@@ -162,6 +163,7 @@ def surf_type(nr):
 
 
 def convert_3dcurve(edge, curve_input=False):
+
     d1_feat = {}
     if not curve_input:
         curve = BRepAdaptor_Curve(edge)
@@ -171,15 +173,18 @@ def convert_3dcurve(edge, curve_input=False):
     d1_feat["interval"] = [curve.FirstParameter(), curve.LastParameter()]
     d1_feat["type"] = c_type
 
-    trsf = curve.Trsf()
-    transform = np.full((3, 4), None)
-    for i in range(3):
-        for j in range(4):
-            transform[i, j] = trsf.Value(i + 1, j + 1)
+    if hasattr(curve, "Trsf"):
+        trsf = curve.Trsf()
+        transform = np.full((3, 4), None)
+        for i in range(3):
+            for j in range(4):
+                transform[i, j] = trsf.Value(i + 1, j + 1)
+    else:
+        transform = np.eye(3, 4)
+
     d1_feat["transform"] = transform
     
     if c_type == "Other":
-        #print("Other Curve")
         return d1_feat
 
     if c_type == "Line":
@@ -299,21 +304,25 @@ def convert_2dcurve(edge, surface):
 
 def convert_surface(face):
     d2_feat = {}
-    surf = BRepAdaptor_Surface(face)
+    if isinstance(face, Adaptor3d_Surface):
+        surf = face
+    else:
+        surf = BRepAdaptor_Surface(face)
 
-    trsf = surf.Trsf()
-    transform = np.full((3, 4), None)
-    for i in range(3):
-        for j in range(4):
-            transform[i, j] = trsf.Value(i + 1, j + 1)
-    d2_feat["transform"] = transform
+    if hasattr(surf, "Trsf"):
+        trsf = surf.Trsf()
+        transform = np.full((3, 4), None)
+        for i in range(3):
+            for j in range(4):
+                transform[i, j] = trsf.Value(i + 1, j + 1)
+        d2_feat["transform"] = transform
+    else:
+        d2_feat['transform'] = np.eye(3, 4)
 
 
     s_type = surf_type(surf.GetType())
     d2_feat["type"] = s_type
-    _round = lambda x: round(x, 15)
-    d2_feat["trim_domain"] = list(map(_round, breptools.UVBounds(face)))
-    #print(surf.FirstUParameter(), surf.LastUParameter(), surf.FirstVParameter(), surf.LastVParameter())
+    d2_feat["trim_domain"] = [surf.FirstUParameter(), surf.LastUParameter(), surf.FirstVParameter(), surf.LastVParameter()]
     #print(d2_feat["face_domain"])
 
         
@@ -369,9 +378,8 @@ def convert_surface(face):
 
     elif s_type == "BSpline":
         c = surf.BSpline()
-        _round = lambda x: round(x, 15)
-        d2_feat["trim_domain"] = list(map(_round, breptools.UVBounds(face)))
-        d2_feat["face_domain"] = list(map(_round, c.Bounds()))
+
+        d2_feat["face_domain"] = list(c.Bounds())
         d2_feat["is_trimmed"] = d2_feat["trim_domain"] != d2_feat["face_domain"]
 
         #print(c.IsUPeriodic(), c.IsVPeriodic())
@@ -452,6 +460,12 @@ def convert_surface(face):
         d1_feat = convert_3dcurve(c, curve_input=True)
         d2_feat["direction"] = list(surf.Direction().Coord())
         d2_feat["curve"] = d1_feat
+
+    elif s_type == "Offset":
+        c = surf.BasisSurface()
+        d2_feat["value"] = surf.OffsetValue()
+        d2_feat["surface"] = convert_surface(c)
+
         
     else:
         print("Unsupported type", s_type)
