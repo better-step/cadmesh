@@ -21,15 +21,13 @@ from OCC.Core.Adaptor3d import Adaptor3d_Surface
 
 
 
-from yaml import CLoader
-import yaml
 import json
 import numpy as np
 
 def write_dictionary_to_file(path, data, data_format="yaml"):
     if data_format.lower() == "json":
         write_dict_to_json(path, data)
-    elif data_format.lower() == "yaml": 
+    elif data_format.lower() == "yaml":
         write_dict_to_yaml(path, data)
     else:
         print("Wrong data_format, allowed types are 'yaml' and 'json'.")
@@ -37,19 +35,15 @@ def write_dictionary_to_file(path, data, data_format="yaml"):
 def load_dictionary_from_file(path, data_format="yaml"):
     if data_format.lower() == "json":
         return load_dict_from_json(path)
-    elif data_format.lower() == "yaml": 
-        return load_dict_from_yaml(path)
     else:
         print("Wrong data_format, allowed types are 'yaml' and 'json'.")
-        
-def load_dict_from_yaml(path):
-    with open(path, "r") as fp:
-        return yaml.load(fp, Loader=CLoader)
+
+
 
 def load_dict_from_json(path):
     with open(path, "r") as fp:
         return json.load(fp)
-        
+
 def write_dict_to_yaml(path, data):
     if not path.suffix.endswith(".yaml"):
         new_path = path.with_suffix(path.suffix + ".yaml")
@@ -57,7 +51,7 @@ def write_dict_to_yaml(path, data):
         new_path = path
     with open(new_path, "w") as fp:
         yaml.dump(data, fp, indent=2, width=79, default_flow_style=None)
-        
+
 def write_dict_to_json(path, data):
     new_path = path.with_suffix(path.suffix + ".json")
     with open(new_path, "w") as fp:
@@ -72,7 +66,7 @@ def load_parts_from_step_file(pathname, logger=None):
         nr = 1
         try:
             while True:
-                
+
                 ok = step_reader.TransferRoot(nr)
                 if not ok:
                     break
@@ -183,7 +177,7 @@ def convert_3dcurve(edge, curve_input=False):
         transform = np.eye(3, 4)
 
     d1_feat["transform"] = transform
-    
+
     if c_type == "Other":
         return d1_feat
 
@@ -325,7 +319,7 @@ def convert_surface(face):
     d2_feat["trim_domain"] = [surf.FirstUParameter(), surf.LastUParameter(), surf.FirstVParameter(), surf.LastVParameter()]
     #print(d2_feat["face_domain"])
 
-        
+
     if s_type == "Plane":
         s = surf.Plane()
         #print(dir(s), dir(surf), type(s), type(surf))
@@ -466,9 +460,9 @@ def convert_surface(face):
         d2_feat["value"] = surf.OffsetValue()
         d2_feat["surface"] = convert_surface(c)
 
-        
+
     else:
         print("Unsupported type", s_type)
         print(dir(surf))
-    
+
     return d2_feat

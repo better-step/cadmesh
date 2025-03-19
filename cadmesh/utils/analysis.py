@@ -24,16 +24,16 @@ def parse_geometry_file_for_types(path):
                     surf_types.append(s3d["type"])
     except:
         pass
-    
+
     return path, curve_types, surf_types
-    
+
 
 def process_files_parallel(path, function, jobs=12):
-    files = glob.glob(path)   
+    files = glob.glob(path)
 
     with tqdm_joblib(tqdm(desc="Processing geometry files", total=len(files))) as progress_bar:
         results = Parallel(n_jobs=jobs)(delayed(function)(gf) for gf in files)
-    
+
     return results
 
 
@@ -76,7 +76,7 @@ def analyse_curve_and_surface_types(path):
     line_types = ["Line", "Circle", "Ellipse", "Hyperbola", "Parabola", "Bezier", "BSpline", "Offset", "Other"]
     surf_types = ["Plane", "Cylinder", "Cone", "Sphere", "Torus", "Bezier", "BSpline", "Revolution", "Extrusion", "Offset", "Other"]
 
-    g_lines = Counter()    
+    g_lines = Counter()
     g_surfs = Counter()
     rev_ext = []
     for r in results[:]:
@@ -87,8 +87,8 @@ def analyse_curve_and_surface_types(path):
         g_surfs.update(r[2])
         if surfs["Revolution"] > 0 or surfs["Extrusion"] > 0:
             rev_ext.append(nr)
-            
+
     plot_types(g_lines, title="Curve types")
     plot_types(g_surfs, title="Surface types")
-    
+
     return g_lines, g_surfs, rev_ext

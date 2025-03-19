@@ -12,72 +12,6 @@ import multiprocessing
 import subprocess
 from tqdm import tqdm
 
-def process_files(success_files, models_folder, output_folder, batch_id, job_id):
-    successful_conversions = []
-    failed_conversions = []
-    input_folder = Path(models_folder)
-    output_folder_path = Path(output_folder)
-
-    for item in tqdm(success_files):
-        try:
-            output_folder_path.mkdir(parents=True, exist_ok=True)
-            model_name = item.stem
-
-            meshPath = input_folder / f"{model_name}_mesh"
-            geometry_yaml_file_path = input_folder / f"{model_name}_geo.yaml"
-            topology_yaml_file_path = input_folder / f"{model_name}_topo.yaml"
-            stat_yaml_file_path = input_folder / f"{model_name}_stat.yaml"
-            output_file = output_folder_path / f'{model_name}.sample_hdf5'
-
-            assert meshPath.exists()
-            assert geometry_yaml_file_path.exists()
-            assert topology_yaml_file_path.exists()
-            assert stat_yaml_file_path.exists()
-
-            geometry_data = load_dict_from_yaml(geometry_yaml_file_path)
-            topology_data = load_dict_from_yaml(topology_yaml_file_path)
-            stat_data = load_dict_from_yaml(stat_yaml_file_path)
-
-            convert_data_to_hdf5(geometry_data, topology_data, stat_data, meshPath, output_file)
-
-            successful_conversions.append(model_name)
-
-            # delete files on success
-            for file in [item, meshPath, geometry_yaml_file_path, topology_yaml_file_path, stat_yaml_file_path]:
-                try:
-                    if file.exists():
-                        if file.is_dir():
-                            shutil.rmtree(str(file))  # for directories
-                        else:
-                            os.remove(str(file))  # for files
-                except OSError as e:
-                    print(f"Error: {file} : {e.strerror}")
-
-        except Exception as e:
-            print(f"Conversion failed for model {model_name}. Error: {e}")
-            failed_conversions.append(model_name)
-
-    with open(f'successful_conversions_{job_id}_{batch_id}.txt', 'w') as f:
-        for item in successful_conversions:
-            f.write("%s\n" % item)
-
-    with open(f'failed_conversions_{job_id}_{batch_id}.txt', 'w') as f:
-        for item in failed_conversions:
-            f.write("%s\n" % item)
-
-    if len(failed_conversions) > 0:
-        print(f"Some files failed conversion. Check 'failed_conversions_{job_id}_{batch_id}.txt' for details.")
-        exit(1)
-    else:
-        print(f"All files successfully converted. Check 'successful_conversions_{job_id}_{batch_id}.txt' for details.")
-        try:
-            if input_folder.exists():
-                shutil.rmtree(str(input_folder))  # Delete the models folder
-        except OSError as e:
-            print(f"Error: {input_folder} : {e.strerror}")
-        exit(0)
-
-
 
 def main():
         parser = argparse.ArgumentParser(description="Process STEP files in a directory.")
@@ -100,7 +34,6 @@ def main():
         with open(args.output + 'failed.txt', 'w') as f:
             for item in failed:
                 f.write(str(item) + "\n")
-        # process_files(success, args.output, args.hdf5_file, args.batchId, args.jobId)
 
 if __name__ == "__main__":
     main()

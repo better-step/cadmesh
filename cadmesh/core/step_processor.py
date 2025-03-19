@@ -42,17 +42,17 @@ class StepProcessor:
         self.geometry_builder = geometry_builder
         self.mesh_builder = mesh_builder
         self.stats_builder = stats_builder
-        
+
         self.data_format = "yaml"
-        
+
         self.extract_geometry = self.geometry_builder != None
         self.extract_meshes = self.mesh_builder != None
         self.extract_stats = self.stats_builder != None
         self.extract_topo = self.topology_builder != None
-        
+
         # Initialize the parts list
         self.parts = []
-        
+
         # Directory for output files
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
@@ -60,7 +60,7 @@ class StepProcessor:
         # Create logdir
         self.log_dir = log_dir #output_dir.stem.replace("results", "log")
         os.makedirs(self.log_dir, exist_ok=True)
-        
+
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         log_file_name = step_file.stem
         if step_file.stem == 'assembly':
@@ -79,21 +79,21 @@ class StepProcessor:
         if len(self.parts) == 0:
             self.logger.info("No parts loaded to process.")
             return
-        
+
         # If no indices are given, process all parts
         if len(indices) == 0:
             indices = range(len(self.parts))
             self.logger.info("Processing all %i parts of file."%len(indices))
-        
+
         topo_dicts = []
         geo_dicts = []
         mesh_dicts = []
         stats_dicts = []
-        
+
         # Iterate over all indices
         for index in indices:
             part = self.parts[index]
-            
+
             # Convert complete part to NURBS surfaces
             if convert:
                 try:
@@ -105,7 +105,7 @@ class StepProcessor:
                     #print(e.args.split("\n"))
                     self.logger.error("Nurbs conversion error: %s"%"".join(str(e).split("\n")[:2]))
                     continue
-            
+
             # Fix shape with healing operations
             if fix:
                 #print("Fixing shape")
@@ -115,7 +115,7 @@ class StepProcessor:
                 #b.SetMinTolerance(1e-8)
                 b.Perform()
                 part = b.Shape()
-        
+
             # Extract information for part
             try:
                 topo_dict, geo_dict, meshes, stats_dict = self.__process_part(part)
@@ -124,7 +124,7 @@ class StepProcessor:
                 self.logger.error("Processing part failed %i"%index)
                 self.logger.error(str(e))
                 continue
-            
+
             topo_dicts.append(topo_dict)
             geo_dicts.append(geo_dict)
             stats_dicts.append(stats_dict)
@@ -189,7 +189,7 @@ class StepProcessor:
 
 
 
-            
+
     def __process_part(self, part):
         self.logger.info("Entity mapper: Init")
         entity_mapper = self.entity_mapper([part])

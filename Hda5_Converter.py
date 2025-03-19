@@ -1,19 +1,10 @@
 import h5py
 import meshio
-import yaml
 import os
 from pathlib import Path
 import numpy as np
 
 
-def load_dict_from_yaml(path):
-    try:
-        with open(path, "r") as fp:
-            return yaml.load(fp, Loader=yaml.CLoader)
-    except IOError as e:
-        print(f"Error opening or reading the file: {e}")
-    except yaml.YAMLError as e:
-        print(f"Error parsing YAML file: {e}")
 
 
 def convert_dict_to_hdf5(data, group):
