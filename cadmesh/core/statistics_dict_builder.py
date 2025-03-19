@@ -20,10 +20,10 @@ def extract_face_stats(face, entity_mapper, prec=1e-8):
     # Outer wire
     ow = shapeanalysis.OuterWire(face)
     # ow = shapeanalysis_OuterWire(face)
-    stats["outer_wire"] = entity_mapper.loop_index(ow)
+    stats["outer_loop"] = entity_mapper.loop_index(ow)
 
-    # 
-    srf = BRep_Tool().Surface(face)               
+    #
+    srf = BRep_Tool().Surface(face)
     sas = ShapeAnalysis_Surface(srf)
 
     stats["has_singularities"] = sas.HasSingularities(prec)
@@ -47,10 +47,10 @@ def extract_face_stats(face, entity_mapper, prec=1e-8):
             point2d = sas.ValueOfUV(point3d, prec)
             singularity["point2d"] = list(point2d.Coord())
             singularities.append(singularity)
-        else: 
+        else:
             break
 
-    stats["singularities"] = singularities   
+    stats["singularities"] = singularities
     #print(stats["has_singularities"])
     #print(stats["nr_singularities"])
 #                 surf = BRepAdaptor_Surface(face)
@@ -83,7 +83,7 @@ def extract_statistical_information(body, entity_mapper, logger):
             #print(e.args.split("\n"))
             logger.error("Stat extraction error: %s"%str(e))
             continue
-            
+
 
     #print("ESI", stats)
     return stats
