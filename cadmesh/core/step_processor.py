@@ -36,6 +36,13 @@ class StepProcessor:
         """
         Create the processor, initialize the logger
         """
+        if isinstance(step_file, str):
+            step_file = Path(step_file)
+        if isinstance(output_dir, str):
+            output_dir = Path(output_dir)
+        if isinstance(log_dir, str):
+            log_dir = Path(log_dir)
+
         self.step_file = step_file
         self.entity_mapper = entity_mapper
         self.topology_builder = topology_builder
@@ -165,27 +172,28 @@ class StepProcessor:
 
         with h5py.File(hdf5_path, "w") as hdf5_file:
 
-            convert_dict_to_hdf5({"parts": topo_dicts, "version": version},
-                                 hdf5_file.create_group("topology"))
-            convert_dict_to_hdf5({"parts": geo_dicts, "version": version},
-                                 hdf5_file.create_group("geometry"))
-            convert_stat_to_hdf5({"parts": stats_dicts, "version": version},
-                                 hdf5_file.create_group("stat"))
+            parts_group = hdf5_file.create_group('parts')
+            parts_group.create_dataset('version', data=version)
 
+            for i, (topo_dict, geo_dict, meshes, stats_dict) in enumerate(zip(topo_dicts, geo_dicts, mesh_dicts, stats_dicts)):
+                part_group = parts_group.create_group('part_' + str(i + 1).zfill(3))
 
-            mesh_group = hdf5_file.create_group('mesh/parts')
-            for i, meshes in enumerate(mesh_dicts):
-                part_mesh_grp = mesh_group.create_group('part_' + str(i + 1).zfill(3))
+                for i, k in enumerate(topo_dict["faces"]):
+                    s = stats_dict[i]
+                    k.update(s)
+
+                convert_dict_to_hdf5(topo_dict, part_group.create_group('topology'))
+                convert_dict_to_hdf5(geo_dict, part_group.create_group('geometry'))
+                # convert_stat_to_hdf5(stats_dict, part_group.create_group('stat'))
+
+                mesh_group = part_group.create_group('mesh')
                 for index, mesh in enumerate(meshes):
                     points = mesh["vertices"]
                     faces = mesh["faces"]
-                    mesh_subgroup = part_mesh_grp.create_group(str(index).zfill(3))
-                    # mesh_subgroup.create_dataset('points', data=points)
-                    # mesh_subgroup.create_dataset('triangle', data=faces)
+                    mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
                     mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
                     mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
-                    # group_ids = np.full((faces.shape[0],), -1, dtype=int)
-                    # mesh_subgroup.create_dataset("group_ids", data=group_ids)
+
 
 
 
