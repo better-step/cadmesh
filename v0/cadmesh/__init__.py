@@ -24,6 +24,7 @@ from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array2OfReal
 from OCC.Core.TColgp import TColgp_Array1OfPnt, TColgp_Array2OfPnt, TColgp_Array1OfPnt2d
 from OCC.Core.BRepGProp import (brepgprop_SurfaceProperties,
                                 brepgprop_VolumeProperties)
+
 from OCC.Core.Geom2dAdaptor import Geom2dAdaptor_Curve
 from OCCUtils.edge import Edge
 from OCCUtils.Topology import Topo

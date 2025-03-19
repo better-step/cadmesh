@@ -128,6 +128,7 @@ class StepProcessor:
             topo_dicts.append(topo_dict)
             geo_dicts.append(geo_dict)
             stats_dicts.append(stats_dict)
+            mesh_dicts.append(meshes)
 
             # if write_face_obj:
             #     mesh_path = self.output_dir / f"{self.step_file.stem}_mesh"
@@ -171,18 +172,20 @@ class StepProcessor:
             convert_stat_to_hdf5({"parts": stats_dicts, "version": version},
                                  hdf5_file.create_group("stat"))
 
-            mesh_group = hdf5_file.create_group('mesh')
 
-            for index, mesh in enumerate(meshes):
-                points = mesh["vertices"]
-                faces = mesh["faces"]
-                mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
-                # mesh_subgroup.create_dataset('points', data=points)
-                # mesh_subgroup.create_dataset('triangle', data=faces)
-                mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
-                mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
-                # group_ids = np.full((faces.shape[0],), -1, dtype=int)
-                # mesh_subgroup.create_dataset("group_ids", data=group_ids)
+            mesh_group = hdf5_file.create_group('mesh/parts')
+            for i, meshes in enumerate(mesh_dicts):
+                part_mesh_grp = mesh_group.create_group('part_' + str(i + 1).zfill(3))
+                for index, mesh in enumerate(meshes):
+                    points = mesh["vertices"]
+                    faces = mesh["faces"]
+                    mesh_subgroup = part_mesh_grp.create_group(str(index).zfill(3))
+                    # mesh_subgroup.create_dataset('points', data=points)
+                    # mesh_subgroup.create_dataset('triangle', data=faces)
+                    mesh_subgroup.create_dataset('points', data=points, compression="gzip", compression_opts=9)
+                    mesh_subgroup.create_dataset('triangle', data=faces, compression="gzip", compression_opts=9)
+                    # group_ids = np.full((faces.shape[0],), -1, dtype=int)
+                    # mesh_subgroup.create_dataset("group_ids", data=group_ids)
 
 
 
@@ -222,10 +225,10 @@ class StepProcessor:
 
         # Extract meshes
         if self.extract_meshes:
-            lenght = 0.1
+            lenght = 1e-6
             if geo_dict and 'bbox' in geo_dict:
                 bbox = geo_dict['bbox']
-                lenght = max(bbox[3] - bbox[0], bbox[4] - bbox[1], bbox[5] - bbox[2]) * 0.1
+                lenght = max(bbox[3] - bbox[0], bbox[4] - bbox[1], bbox[5] - bbox[2]) * lenght
 
             self.logger.info("Extract mesh: Init")
             mesh_builder = self.mesh_builder(entity_mapper, self.logger)
