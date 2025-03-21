@@ -48,7 +48,6 @@ def with_timeout(timeout):
 
 # @with_timeout(60.0)
 def process_single_step(sf, output_dir, log_dir, produce_meshes=True):
-
     try:
         if produce_meshes:
             sp = StepProcessor(sf, Path(output_dir), Path(log_dir))
@@ -101,7 +100,6 @@ def process_step_files(input_file_list, output_dir, log_dir):
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
 
-    # Read input files from a list in a text file
     with open(input_file_list, 'r') as f:
         input_files = [Path(line.strip()) for line in f]
 
@@ -110,9 +108,8 @@ def process_step_files(input_file_list, output_dir, log_dir):
 
 
     with tqdm_joblib(tqdm(desc="Processing step files", total=len(input_files))) as progress_bar:
-        results = Parallel(n_jobs=2)(delayed(process_single_step)(sf, output_dir, log_dir) for sf in input_files)
-
-    model_names = []  # this will hold just the model names
+        results = Parallel(n_jobs=4)(delayed(process_single_step)(sf, output_dir, log_dir) for sf in input_files)
+    model_names = []
 
     for sf, error_message in results:
         if error_message is None:

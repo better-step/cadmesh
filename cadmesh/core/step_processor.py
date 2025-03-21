@@ -82,7 +82,7 @@ class StepProcessor:
     def load_step_file(self):
         self.parts = load_parts_from_step_file(self.step_file, logger=self.logger)
 
-    def process_parts(self, convert=False, fix=False, write_face_obj=True, write_part_obj=True, indices=[], version="2.01"):
+    def process_parts(self, convert=False, fix=False, write_face_obj=True, write_part_obj=True, indices=[], version="2.0"):
         if len(self.parts) == 0:
             self.logger.info("No parts loaded to process.")
             return
@@ -173,7 +173,7 @@ class StepProcessor:
         with h5py.File(hdf5_path, "w") as hdf5_file:
 
             parts_group = hdf5_file.create_group('parts')
-            parts_group.create_dataset('version', data=version)
+            parts_group.attrs['version'] = version
 
             for i, (topo_dict, geo_dict, meshes, stats_dict) in enumerate(zip(topo_dicts, geo_dicts, mesh_dicts, stats_dicts)):
                 part_group = parts_group.create_group('part_' + str(i + 1).zfill(3))
@@ -233,7 +233,7 @@ class StepProcessor:
 
         # Extract meshes
         if self.extract_meshes:
-            lenght = 1e-6
+            lenght = 1e-3
             if geo_dict and 'bbox' in geo_dict:
                 bbox = geo_dict['bbox']
                 lenght = max(bbox[3] - bbox[0], bbox[4] - bbox[1], bbox[5] - bbox[2]) * lenght
