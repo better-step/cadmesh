@@ -19,19 +19,17 @@ def main():
         parser.add_argument("--output", help="Path to the directory where results will be saved.")
         parser.add_argument("--log", help="Path to the directory where logs will be saved.")
         parser.add_argument("--hdf5_file", help="Path to the HDF5 file where results will be saved.")
-        # parser.add_argument("--jobId", help="Job ID for this execution")
-        # parser.add_argument("--batchId", help="Batch ID for this execution")
         args = parser.parse_args()
 
         success, failed = cadmesh.utils.processing.process_step_files(args.input, args.output, args.log)
         print(f"Successful conversions: {success}")
         print(f"Failed conversions: {failed}")
 
-        with open(args.output + 'success.txt', 'w') as f:
+        with open(args.input + 'success.txt', 'w') as f:
             for item in success:
                 f.write(str(item) + "\n")
 
-        with open(args.output + 'failed.txt', 'w') as f:
+        with open(args.input + 'failed.txt', 'w') as f:
             for item in failed:
                 f.write(str(item) + "\n")
 
