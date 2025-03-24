@@ -74,9 +74,15 @@ class StepProcessor:
             log_file_name = step_file.parent.name + '_' + step_file.stem
         else:
             log_file_name = step_file.stem
-        logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%log_file_name), formatter)
-        logger.info("Init step processing: %s"%step_file.stem)
-        self.logger = logger
+        
+        # Enable the next 3 lines for enabling logger
+        # logger = setup_logger('%s_logger'%step_file.stem, os.path.join(log_dir, '%s.log'%log_file_name), formatter)
+        # logger.info("Init step processing: %s"%step_file.stem)
+        # self.logger = logger
+
+        # Comment next 2 to enable logging
+        self.logger = logging.getLogger('dummy')
+        self.logger.addHandler(logging.NullHandler())
 
 
     def load_step_file(self):
