@@ -17,10 +17,13 @@ def extract_face_stats(face, entity_mapper, prec=1e-8):
     except:
         stats["exact_domain"] = []
 
-    # Outer wire
-    ow = shapeanalysis.OuterWire(face)
-    # ow = shapeanalysis_OuterWire(face)
-    stats["outer_loop"] = entity_mapper.loop_index(ow)
+    try:
+        # Outer wire
+        ow = shapeanalysis.OuterWire(face)
+        # ow = shapeanalysis_OuterWire(face)
+        stats["outer_loop"] = entity_mapper.loop_index(ow)
+    except:
+        stats["outer_loop"] = -1
 
     #
     srf = BRep_Tool().Surface(face)
@@ -29,7 +32,7 @@ def extract_face_stats(face, entity_mapper, prec=1e-8):
     stats["has_singularities"] = sas.HasSingularities(prec)
     stats["nr_singularities"] = sas.NbSingularities(prec)
     singularities = []
-    for i in range(1, 10):
+    for i in range(1, stats["nr_singularities"]+1):
         point3d = gp_Pnt()
         point2d_first = gp_Pnt2d()
         point2d_last = gp_Pnt2d()

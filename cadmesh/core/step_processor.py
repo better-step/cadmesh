@@ -178,8 +178,8 @@ class StepProcessor:
             for i, (topo_dict, geo_dict, meshes, stats_dict) in enumerate(zip(topo_dicts, geo_dicts, mesh_dicts, stats_dicts)):
                 part_group = parts_group.create_group('part_' + str(i + 1).zfill(3))
 
-                for i, k in enumerate(topo_dict["faces"]):
-                    s = stats_dict[i]
+                for j, k in enumerate(topo_dict["faces"]):
+                    s = stats_dict[j]
                     k.update(s)
 
                 convert_dict_to_hdf5(topo_dict, part_group.create_group('topology'))

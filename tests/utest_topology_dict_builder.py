@@ -15,8 +15,8 @@ from matplotlib.patches import Polygon
 import igl
 
 # CAD
-from entity_mapper import EntityMapper
-from topology_dict_builder import TopologyDictBuilder
+from cadmesh.core.entity_mapper import EntityMapper
+from cadmesh.core.topology_dict_builder import TopologyDictBuilder
 import topology_utils as  topology_utils
 
 # PythonOCC
