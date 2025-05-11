@@ -288,6 +288,11 @@ class TopologyDictBuilder:
             "orientation_wrt_edge": orientation
         }
 
+    def build_dict_for_bodies(self, bodies):
+        """
+        Alias for build_dict_for_parts(bodies); kept only for legacy tests.
+        """
+        return self.build_dict_for_parts(bodies)
 
     def point_to_str(self, pt):
         return f"<{pt.X()}, {pt.Z()}, {pt.Z()}>"

@@ -1,121 +1,95 @@
-from tqdm.auto import tqdm
+"""
+Batch helpers used by the CLI or importable by end-users.
+This module contains functions to convert multiple STEP files in parallel.
+"""
+from __future__ import annotations
+import os
+from pathlib import Path
+from typing import List, Tuple
 import contextlib
 import joblib
-import logging
-from pathlib import Path
-import multiprocessing
-import functools
-import os
 from joblib import Parallel, delayed
+from tqdm.auto import tqdm
+
+from src.cadmesh.converters.hdf5_converter import process_step_file_to_hdf5
 
 
-
-from ..core.step_processor import StepProcessor
-
+# ────────────────────────────────────────────────────────────────────── #
 @contextlib.contextmanager
-def tqdm_joblib(tqdm_object):
-    """Context manager to patch joblib to report into tqdm progress bar given as argument"""
-    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-
+def _tqdm_joblib(bar: "tqdm"):
+    class _Callback(joblib.parallel.BatchCompletionCallBack):
         def __call__(self, *args, **kwargs):
-            tqdm_object.update(n=self.batch_size)
+            bar.update(self.batch_size)
             return super().__call__(*args, **kwargs)
-
-    old_batch_callback = joblib.parallel.BatchCompletionCallBack
-    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    old = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = _Callback
     try:
-        yield tqdm_object
+        yield bar
     finally:
-        joblib.parallel.BatchCompletionCallBack = old_batch_callback
-        tqdm_object.close()
+        joblib.parallel.BatchCompletionCallBack = old
+        bar.close()
 
 
-def with_timeout(timeout):
-    def decorator(decorated):
-        @functools.wraps(decorated)
-        def inner(*args, **kwargs):
-            pool = multiprocessing.pool.ThreadPool(1)
-            async_result = pool.apply_async(decorated, args, kwargs)
-            try:
-                return async_result.get(timeout), None
-            except multiprocessing.TimeoutError:
-                return None, "TimeoutError"
-        return inner
-    return decorator
-
-
-# @with_timeout(60.0)
-def process_single_step(sf, output_dir, log_dir, produce_meshes=True):
+# ────────────────────────────────────────────────────────────────────── #
+def _worker(sf: Path, out: Path, log: Path, meshes: bool):
     try:
-        if produce_meshes:
-            sp = StepProcessor(sf, Path(output_dir), Path(log_dir))
-        else:
-            sp = StepProcessor(sf, Path(output_dir), Path(log_dir), mesh_builder=None)
-
-        sp.load_step_file()
-        sp.process_parts()
+        process_step_file_to_hdf5(sf, output_dir=out, log_dir=log, produce_meshes=meshes)
         return sf, None
-    except Exception as e:
-        return sf, str(e)
+    except Exception as exc:           # noqa: BLE001
+        return sf, str(exc)
 
 
-def process_step_folder(input_dir, output_dir, log_dir, file_pattern="*.stp", file_range=[0, -1]):
-    data_dir = Path(input_dir)
-    output_dir = Path(output_dir)
-    log_dir = Path(log_dir)
+# ───────────────────── public helpers ──────────────────────────────── #
+def batch_convert_step_files(
+    *,
+    input_list_path: Path,
+    output_dir: Path,
+    log_dir: Path,
+    n_jobs: int = 1,
+    produce_meshes: bool = True,
+) -> Tuple[List[Path], List[Tuple[Path, str]]]:
+    """Convert STEP files listed in a text file."""
+    files = [Path(line.strip()) for line in input_list_path.read_text().splitlines() if line.strip()]
+    return _run_pool(files, output_dir, log_dir, n_jobs, produce_meshes)
 
-    if not data_dir.exists():
-        return [], ['Input directory does not exist']
 
-    os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(log_dir, exist_ok=True)
+def folder_convert_step_files(
+    *,
+    folder: Path,
+    pattern: str,
+    output_dir: Path,
+    log_dir: Path,
+    n_jobs: int = 1,
+    produce_meshes: bool = True,
+    recursive: bool = True,
+) -> Tuple[List[Path], List[Tuple[Path, str]]]:
+    """Convert every STEP file inside *folder* matching *pattern*."""
+    files = sorted(folder.rglob(pattern) if recursive else folder.glob(pattern))
+    return _run_pool(files, output_dir, log_dir, n_jobs, produce_meshes)
 
-    step_files = sorted(data_dir.glob(file_pattern))
-    if file_range[1] == -1:
-        step_files = step_files[file_range[0]:]
+
+
+process_step_files = batch_convert_step_files
+
+
+# ────────────────────── shared implementation ─────────────────────── #
+def _run_pool(files, out_dir, log_dir, n_jobs, meshes):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    ok, fail = [], []
+    with _tqdm_joblib(tqdm(total=len(files), desc="Converting", unit="file")):
+        results = Parallel(n_jobs=n_jobs, backend="loky")(
+            delayed(_worker)(fp, out_dir, log_dir, meshes) for fp in files
+        )
+
+    for fp, err in results:
+        (ok if err is None else fail).append((fp if err is None else (fp, err)))
+
+    # split tuples per contract
+    if fail:
+        ok_only = [fp for fp in ok]            # ok already plain Paths
+        fail_tuples = fail                    # list[(Path, str)]
     else:
-        step_files = step_files[file_range[0]:file_range[1]]
-
-    success_files = []
-    failed_files = []
-
-    with tqdm_joblib(tqdm(desc="Processing step files", total=len(step_files))) as progress_bar:
-        results = Parallel(n_jobs=4)(delayed(process_single_step)(sf, output_dir, log_dir) for sf in step_files)
-
-    for sf, error_message in results:
-        if error_message is None:
-            success_files.append(sf)
-        else:
-            failed_files.append((sf, error_message))
-
-    return success_files, failed_files
-
-
-def process_step_files(input_file_list, output_dir, log_dir):
-    output_dir = Path(output_dir)
-    log_dir = Path(log_dir)
-
-    os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(log_dir, exist_ok=True)
-
-    with open(input_file_list, 'r') as f:
-        input_files = [Path(line.strip()) for line in f]
-
-    success_files = []
-    failed_files = []
-
-
-    with tqdm_joblib(tqdm(desc="Processing step files", total=len(input_files))) as progress_bar:
-        results = Parallel(n_jobs=4)(delayed(process_single_step)(sf, output_dir, log_dir) for sf in input_files)
-    model_names = []
-
-    for sf, error_message in results:
-        if error_message is None:
-            success_files.append(sf)
-            model_names.append(sf.name)
-        else:
-            failed_files.append((sf, error_message))
-
-    return success_files, failed_files
+        ok_only, fail_tuples = ok, []
+    return ok_only, fail_tuples

@@ -1,10 +1,98 @@
+from __future__ import annotations
+
+# ── stdlib ──────────────────────────────────────────────────────────────────
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+# ── third-party ────────────────────────────────────────────────────────────
+import numpy as np
 import h5py
 import meshio
-import os
-from pathlib import Path
-import numpy as np
+
+# ── cadmesh ─────────────────────────────────────────────────────────────────
+from src.cadmesh.core.step_processor import StepProcessor, DEFAULT_MESH_BUILDER
 
 
+
+def process_step_file_to_hdf5(
+    step_file: str | Path,
+    *,
+    output_dir: str | Path = ".",
+    log_dir: str | Path = ".",
+    produce_meshes: bool = True,
+) -> Path:
+    """
+    High-level helper used by the CLI & batch code.
+    This function converts a single STEP file to an HDF5 file.
+
+    Parameters
+    ----------
+    step_file
+        Path to a single ``*.step`` / ``*.stp`` file.
+    output_dir
+        Directory where the final ``<model>.hdf5`` is written.
+    log_dir
+        Directory where :class:`cadmesh.core.StepProcessor` will store logs.
+    produce_meshes
+        ``True``  – run surface mesher (default).
+        ``False`` – skip meshing **but** create a dummy OBJ so the legacy writer
+        does not raise “No mesh files found …”.
+
+    Returns
+    -------
+    Path
+        Full path of the written HDF5 file.
+    """
+    step_path = Path(step_file).expanduser().resolve()
+    out_dir   = Path(output_dir).expanduser().resolve()
+    log_dir   = Path(log_dir).expanduser().resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    # ── run extractor ────────────────────────────────────────────────────
+    sp = StepProcessor(
+        step_file=step_path,
+        output_dir=out_dir,
+        log_dir=log_dir,
+        mesh_builder=None if not produce_meshes else DEFAULT_MESH_BUILDER,
+    )
+    sp.load_step_file()
+    sp.process_parts()
+
+    geometry_data  = sp.geometry_data or {}
+    topology_data  = sp.topology_data or {}
+    statistics_data = sp.stat_data    or {}
+
+    # ── create mesh directory ───────────────────────────────────────────
+    mesh_dir: Path
+    if produce_meshes and sp.mesh_dir and sp.mesh_dir.is_dir():
+        mesh_dir = sp.mesh_dir
+    else:
+        # create a *temporary* dir with one minimal OBJ
+        mesh_dir = out_dir / f"__dummy_mesh__{step_path.stem}"
+        mesh_dir.mkdir(exist_ok=True)
+        if not produce_meshes:
+            _create_minimal_obj(mesh_dir / "dummy.obj")
+
+
+    h5_path = out_dir / f"{step_path.stem}.hdf5"
+    convert_data_to_hdf5(
+        geometry_data=geometry_data,
+        topology_data=topology_data,
+        stat_data=statistics_data,
+        meshPath=str(mesh_dir),
+        output_file=str(h5_path),
+    )
+
+    # clean up dummy directory if we made one
+    if mesh_dir.name.startswith("__dummy_mesh__"):
+        for f in mesh_dir.glob("*"):
+            f.unlink(missing_ok=True)        # Python ≥3.8
+        mesh_dir.rmdir()
+
+    return h5_path
 
 
 def convert_dict_to_hdf5(data, group):
@@ -134,3 +222,11 @@ def convert_data_to_hdf5(geometry_data, topology_data, stat_data, meshPath, outp
         print(f"Error accessing or writing to HDF5 file: {e}")
     except Exception as e:
         print(f"Unexpected error occurred: {e}")
+
+
+
+def _create_minimal_obj(path: Path) -> None:
+    """
+    Write a single-vertex OBJ file so *meshio* can read it without error.
+    """
+    path.write_text("# dummy mesh\nv 0.0 0.0 0.0\n", encoding="utf-8")

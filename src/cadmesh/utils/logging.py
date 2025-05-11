@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import glob
 from tqdm.auto import tqdm
@@ -8,17 +10,60 @@ import time
 import numpy as np
 
 
-def setup_logger(name, log_file, formatter, level=logging.INFO, reset=True):
-    """To setup as many loggers as you want"""
-    if os.path.exists(log_file) and reset:
-        os.remove(log_file)
+def setup_logger(
+    name: str,
+    log_file: str,
+    formatter: logging.Formatter | None = None,
+    level: int = logging.INFO,
+    reset: bool = True,
+) -> logging.Logger:
+    """
+    Create (or reset) and return a named Logger that writes to `log_file`.
+
+    Parameters
+    ----------
+    name
+        Name of the logger (appears in log records).
+    log_file
+        Path to the file where logs are written.
+    formatter
+        logging.Formatter instance to format log messages.
+        If None, a default '%(asctime)s %(levelname)s %(message)s' formatter is used.
+    level
+        Logging level (e.g. logging.INFO).
+    reset
+        If True and the log file already exists, it will be deleted,
+        and any existing handlers on the logger will be removed.
+
+    Returns
+    -------
+    logging.Logger
+    """
+    # Remove old log file if desired
+    if reset and os.path.exists(log_file):
+        try:
+            os.remove(log_file)
+        except OSError:
+            pass
+
+    # Use default formatter if none provided
+    if formatter is None:
+        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+
+    # Configure file handler
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
 
+    # Get or create the logger
     logger = logging.getLogger(name)
     logger.setLevel(level)
-    logger.addHandler(handler)
 
+    if reset:
+        # Remove any existing handlers to avoid duplicate logs
+        for h in list(logger.handlers):
+            logger.removeHandler(h)
+
+    logger.addHandler(handler)
     return logger
 
 
