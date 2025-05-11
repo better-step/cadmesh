@@ -6,21 +6,49 @@ from setuptools import setup
 #     long_description = fh.read()
 
 
-setuptools.setup(
-    name="cadmesh",
-    version="2.0.1",
-    author="Sebastian Koch, Joseph Lambourne",
-    author_email="s.koch@tu-berlin.de",
-    description="Topology, geometry and mesh extraction for CAD files.",
-    #long_description=long_description,
+from setuptools import setup, find_packages
+
+setup(
+    name="steptohdf5",
+    version="0.1.0",
+    description="Convert STEP and other CAD files to HDF5-based mesh archives",
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/skoch9/cadmesh",
-    packages=setuptools.find_packages(),
+    author="Better Step",
+    url="https://github.com/better-step/cadmesh",
+    project_urls={
+        "Source": "https://github.com/better-step/cadmesh",
+        "Tracker": "https://github.com/better-step/cadmesh/issues",
+    },
+    license="GPL-3.0",
     classifiers=[
-        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
         "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Information Analysis",
     ],
-    python_requires='>=3.6',
-    test_suite="test"
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
+    python_requires=">=3.8",
+    install_requires=[
+        "numpy",
+        "pythonocc-core==7.4.0",
+        "igl",
+        "h5py",
+        "meshio",
+        "meshplot",
+        "joblib",
+        "tqdm"
+    ],
+    include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            "steptohdf5 = cadmesh.cli:main",
+        ]
+    },
 )
+
+
+

@@ -73,8 +73,7 @@ def main():
         input_list_path=Path(args.list),
         output_dir=out_dir,
         log_dir=log_dir,
-        n_jobs=args.jobs,
-        produce_meshes=not args.no_mesh,
+        n_jobs=args.jobs
     )
 
     print(f"\nDone  ✓{len(ok)}  ✗{len(failed)}")
