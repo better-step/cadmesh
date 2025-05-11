@@ -31,6 +31,18 @@ meshes – with a one-line CLI **or** a small Python API.
 
 ## 🔧 Installation
 
+
+# 1️⃣  Install Open Cascade bindings (pythonocc-core 7.4.0) from conda-forge
+conda install -c conda-forge pythonocc-core=7.4.0 igl
+
+#    note: the conda package already pulls numpy, h5py, etc.
+
+# 2️⃣  Install steptohdf5 and the remaining pure-Python deps via pip
+pip install steptohdf5-0.1.0-py3-none-any.whl        # local wheel
+#  or, once released:
+pip install steptohdf5
+
+
 Install from PyPI:
 
 ```bash

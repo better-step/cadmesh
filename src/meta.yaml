@@ -7,6 +7,7 @@ package:
 
 source:
   path: ..                # build from the root of your repo
+  sha256: 2386a996fc851f40c27a8f652797cb5807e84f17090ef52b81f47a1d2f4ca3c8
 
 build:
   number: 0
