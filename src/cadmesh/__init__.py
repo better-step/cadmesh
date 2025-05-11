@@ -21,6 +21,5 @@ def convert_step(step_file, *, output_dir=".", log_dir=".", meshes=True):
     return process_step_file_to_hdf5(
         Path(step_file),
         output_dir=Path(output_dir),
-        log_dir=Path(log_dir),
-        produce_meshes=meshes,
+        log_dir=Path(log_dir)
     )

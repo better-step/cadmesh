@@ -31,9 +31,9 @@ def _tqdm_joblib(bar: "tqdm"):
 
 
 # ────────────────────────────────────────────────────────────────────── #
-def _worker(sf: Path, out: Path, log: Path, meshes: bool):
+def _worker(sf: Path, out: Path, log: Path):
     try:
-        process_step_file_to_hdf5(sf, output_dir=out, log_dir=log, produce_meshes=meshes)
+        process_step_file_to_hdf5(sf, output_dir=out, log_dir=log)
         return sf, None
     except Exception as exc:           # noqa: BLE001
         return sf, str(exc)
@@ -45,12 +45,11 @@ def batch_convert_step_files(
     input_list_path: Path,
     output_dir: Path,
     log_dir: Path,
-    n_jobs: int = 1,
-    produce_meshes: bool = True,
+    n_jobs: int = 1
 ) -> Tuple[List[Path], List[Tuple[Path, str]]]:
     """Convert STEP files listed in a text file."""
     files = [Path(line.strip()) for line in input_list_path.read_text().splitlines() if line.strip()]
-    return _run_pool(files, output_dir, log_dir, n_jobs, produce_meshes)
+    return _run_pool(files, output_dir, log_dir, n_jobs)
 
 
 def folder_convert_step_files(
@@ -60,12 +59,11 @@ def folder_convert_step_files(
     output_dir: Path,
     log_dir: Path,
     n_jobs: int = 1,
-    produce_meshes: bool = True,
     recursive: bool = True,
 ) -> Tuple[List[Path], List[Tuple[Path, str]]]:
     """Convert every STEP file inside *folder* matching *pattern*."""
     files = sorted(folder.rglob(pattern) if recursive else folder.glob(pattern))
-    return _run_pool(files, output_dir, log_dir, n_jobs, produce_meshes)
+    return _run_pool(files, output_dir, log_dir, n_jobs)
 
 
 
@@ -73,14 +71,14 @@ process_step_files = batch_convert_step_files
 
 
 # ────────────────────── shared implementation ─────────────────────── #
-def _run_pool(files, out_dir, log_dir, n_jobs, meshes):
+def _run_pool(files, out_dir, log_dir, n_jobs):
     out_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
 
     ok, fail = [], []
     with _tqdm_joblib(tqdm(total=len(files), desc="Converting", unit="file")):
         results = Parallel(n_jobs=n_jobs, backend="loky")(
-            delayed(_worker)(fp, out_dir, log_dir, meshes) for fp in files
+            delayed(_worker)(fp, out_dir, log_dir) for fp in files
         )
 
     for fp, err in results:

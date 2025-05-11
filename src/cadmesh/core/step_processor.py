@@ -23,7 +23,8 @@ Public attributes *after* :py:meth:`process_parts` runs
 ``self.geometry_data``   nested ``dict`` built by *GeometryDictBuilder*  
 ``self.topology_data``   nested ``dict`` built by *TopologyDictBuilder*  
 ``self.stat_data``       nested ``dict`` from *extract_statistical_information*  
-``self.mesh_dir``        ``Path`` to a folder with OBJ files *or* ``None``
+``self.mesh_data``       list of *MeshBuilder* meshes (if used)
+``self.parts``           list of *STEPControl_Reader* parts (raw OCC objects)
 
 """
 
@@ -39,7 +40,7 @@ from typing import Sequence
 from OCC.Core.STEPControl import STEPControl_Reader
 from OCC.Core.ShapeFix import ShapeFix_Shape
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
-import igl                                   # used by MeshBuilder
+import igl  # used by MeshBuilder
 
 # --- package ----------------------------------------------------------------
 from src.cadmesh.core.entity_mapper import EntityMapper
@@ -49,9 +50,6 @@ from src.cadmesh.core.statistics_dict_builder import extract_statistical_informa
 from src.cadmesh.mesh.mesh_builder import MeshBuilder
 from src.cadmesh.utils.geometry import load_parts_from_step_file
 from src.cadmesh.utils.logging import setup_logger
-
-# A public constant so the CLI can say “skip meshes” without importing mesh_builder.
-DEFAULT_MESH_BUILDER = MeshBuilder
 
 
 # --------------------------------------------------------------------------- #
@@ -75,16 +73,16 @@ class StepProcessor:
 
     # ------------------------------------------------------------------ #
     def __init__(
-        self,
-        step_file: str | Path,
-        output_dir: str | Path,
-        log_dir: str | Path,
-        *,
-        entity_mapper=EntityMapper,
-        topology_builder=TopologyDictBuilder,
-        geometry_builder=GeometryDictBuilder,
-        mesh_builder: type[MeshBuilder] | None = DEFAULT_MESH_BUILDER,
-        stats_builder=extract_statistical_information,
+            self,
+            step_file: str | Path,
+            output_dir: str | Path,
+            log_dir: str | Path,
+            *,
+            entity_mapper=EntityMapper,
+            topology_builder=TopologyDictBuilder,
+            geometry_builder=GeometryDictBuilder,
+            mesh_builder=MeshBuilder,
+            stats_builder=extract_statistical_information,
     ):
         self.step_file = Path(step_file).expanduser().absolute()
         self.output_dir = Path(output_dir).expanduser().absolute()
@@ -105,11 +103,13 @@ class StepProcessor:
         self.stats_builder_fn = stats_builder
 
         # placeholders for results
-        self.parts: Sequence             = []
-        self.geometry_data: dict | None  = None
-        self.topology_data: dict | None  = None
-        self.stat_data: dict | None      = None
-        self.mesh_dir: Path | None       = None
+        self.parts: Sequence = []
+        self.geometry_data: dict | None = None
+        self.topology_data: dict | None = None
+        self.stat_data: dict | None = None
+        self.mesh_data: list | None = None
+
+    #  self.mesh_dir: Path | None       = None
 
     # ------------------------------------------------------------------ #
     #  STEP I/O
@@ -124,12 +124,12 @@ class StepProcessor:
     #  Top-level public workflow
     # ------------------------------------------------------------------ #
     def process_parts(
-        self,
-        *,
-        convert_to_nurbs: bool = False,
-        heal_shape: bool = False,
-        mesh_deflection_rel: float = 1e-3,
-        indices: Sequence[int] | None = None,
+            self,
+            *,
+            convert_to_nurbs: bool = False,
+            heal_shape: bool = False,
+            mesh_deflection_rel: float = 1e-3,
+            indices: Sequence[int] | None = None,
     ):
         """
         Extract topology/geometry/stats/(optional)meshes for all or a slice of parts.
@@ -183,12 +183,9 @@ class StepProcessor:
         #  store results in public attrs
         # ------------------------------------------------------------------ #
         self.topology_data = {"parts": topo, "version": "2.0"}
-        self.geometry_data = {"parts": geo,  "version": "2.0"}
-        self.stat_data     = {"parts": stats, "version": "2.0"}
-
-        # optional mesh writes have already happened -> keep folder Path
-        self.mesh_dir = self.output_dir / f"{self.step_file.stem}_mesh" \
-            if mesh_objs else None
+        self.geometry_data = {"parts": geo, "version": "2.0"}
+        self.stat_data = {"parts": stats, "version": "2.0"}
+        self.mesh_data = mesh_objs
 
         self.logger.info("Extraction complete")
 
@@ -214,7 +211,6 @@ class StepProcessor:
         stats_dict = self.stats_builder_fn(part, entity_mapper, self.logger)
 
         # Meshes
-        mesh_paths = []
         if self.mesh_builder_cls is not None:
             bbox = geo_dict.get("bbox", None)
             if bbox:
@@ -228,18 +224,4 @@ class StepProcessor:
             # returns list of {vertices, faces}
             meshes = m_builder.create_surface_meshes(part, length)
 
-            mesh_dir = self.output_dir / f"{self.step_file.stem}_mesh"
-            mesh_dir.mkdir(exist_ok=True)
-
-            for i, m in enumerate(meshes):
-                if len(m["vertices"]) == 0:
-                    continue
-                obj_path = mesh_dir / f"{i:03d}.obj"
-                igl.write_triangle_mesh(
-                    str(obj_path),
-                    m["vertices"],
-                    m["faces"]
-                )
-                mesh_paths.append(obj_path)
-
-        return topo_dict, geo_dict, stats_dict, mesh_paths
+        return topo_dict, geo_dict, stats_dict, meshes
