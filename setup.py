@@ -34,7 +34,6 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "numpy",
-        "pythonocc-core==7.4.0",
         "igl",
         "h5py",
         "meshio",
@@ -42,6 +41,10 @@ setup(
         "joblib",
         "tqdm"
     ],
+    extras_require={
+        # Users on CPython-3.10+ can do: `pip install steptohdf5[occ]`
+        "occ": ["pythonocc-core>=7.4.0"],
+    },
     include_package_data=True,
     entry_points={
         "console_scripts": [

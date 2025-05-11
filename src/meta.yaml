@@ -1,0 +1,43 @@
+{% set name = "steptohdf5" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  path: ..                # build from the root of your repo
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"   # pip inside conda-build is OK
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - numpy
+    - pythonocc-core 7.4.0
+    - igl
+    - h5py
+    - meshio
+    - meshplot
+    - joblib
+    - tqdm
+
+test:
+  imports:
+    - cadmesh                            # internal import path
+  commands:
+    - steptohdf5 --help
+
+about:
+  home: https://github.com/better-step/cadmesh
+  license: GPL-3.0
+  summary: "Convert STEP to HDF5 surface-mesh archives"
+
+extra:
+  recipe-maintainers:
+    - itsmeechandu
