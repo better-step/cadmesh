@@ -11,7 +11,7 @@ import joblib
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from src.cadmesh.converters.hdf5_converter import process_step_file_to_hdf5
+from ..converters.hdf5_converter import process_step_file_to_hdf5
 
 
 # ────────────────────────────────────────────────────────────────────── #

@@ -4,7 +4,7 @@ Tiny public façade for CADMesh-HDF5.
 
 Examples
 --------
-from cadmesh import convert_step
+from steptohdf5 import convert_step
 convert_step("Gear.step", output_dir="out", log_dir="logs")
 
 
@@ -16,8 +16,8 @@ from .converters.hdf5_converter import process_step_file_to_hdf5
 import sys
 if "src" in sys.modules and sys.modules["src"] is not None:
     raise ImportError(
-        "Found an attempt to import 'src.cadmesh'. "
-        "Use 'cadmesh.…' or relative imports inside the package."
+        "Found an attempt to import 'src.steptohdf5'. "
+        "Use 'steptohdf5.…' or relative imports inside the package."
     )
 
 def convert_step(step_file, *, output_dir=".", log_dir="."):

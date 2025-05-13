@@ -1,6 +1,6 @@
 import os
-import cadmesh
-import occutils
+import steptohdf5
+import OCCUtils
 import argparse
 from hdf5_converter import *
 from pathlib import Path
@@ -21,7 +21,7 @@ def main():
         parser.add_argument("--hdf5_file", help="Path to the HDF5 file where results will be saved.")
         args = parser.parse_args()
 
-        success, failed = cadmesh.utils.processing.process_step_files(args.input, args.output, args.log)
+        success, failed = steptohdf5.utils.processing.process_step_files(args.input, args.output, args.log)
         print(f"Successful conversions: {success}")
         print(f"Failed conversions: {failed}")
 

@@ -1,9 +1,7 @@
-{% set name = "steptohdf5" %}
-{% set version = "0.1.0" %}
 
 package:
-  name: {{ name }}
-  version: {{ version }}
+  name: "steptohdf5"
+  version: "0.1.0"
 
 source:
   path: ..                # build from the root of your repo

@@ -1,14 +1,14 @@
-# src/cadmesh/cli.py
+# src/steptohdf5/cli.py
 from __future__ import annotations
 import argparse
 from pathlib import Path
-from cadmesh import convert_step
-from cadmesh.utils.processing import batch_convert_step_files
+from steptohdf5 import convert_step
+from steptohdf5.utils.processing import batch_convert_step_files
 
 
 def build_parser():
     p = argparse.ArgumentParser(
-        prog="cadmesh-hdf5",
+        prog="steptohdf5-hdf5",
         description="Convert STEP → HDF5 (single file or batch list)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )

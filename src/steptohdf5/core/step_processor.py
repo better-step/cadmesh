@@ -1,4 +1,4 @@
-# src/cadmesh/core/step_processor.py
+# src/steptohdf5/core/step_processor.py
 """
 StepProcessor
 =============
@@ -12,7 +12,7 @@ A thin orchestration layer that:
 4.  stores those results in public attributes so that callers
    (CLI / batch / notebook) can do whatever they like with them
    – for instance, write them to HDF5 via
-   :pyfunc:`cadmesh.converters.hdf5_converter.process_step_file_to_hdf5`.
+   :pyfunc:`steptohdf5.converters.hdf5_converter.process_step_file_to_hdf5`.
 
 Nothing in here touches HDF5, YAML, or the filesystem except
 temporary OBJ meshes when a *MeshBuilder* is used.

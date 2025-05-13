@@ -20,43 +20,8 @@ from OCC.Core.Adaptor3d import Adaptor3d_Surface
 # from OCC.Core.ShapeAnalysis import shapeanalysisOuterWire
 # from OCC.Core.ShapeAnalysis import shapeanalysis_GetFaceUVBounds
 
-
-
-import json
 import numpy as np
-import yaml
-def write_dictionary_to_file(path, data, data_format="yaml"):
-    if data_format.lower() == "json":
-        write_dict_to_json(path, data)
-    elif data_format.lower() == "yaml":
-        write_dict_to_yaml(path, data)
-    else:
-        print("Wrong data_format, allowed types are 'yaml' and 'json'.")
 
-def load_dictionary_from_file(path, data_format="yaml"):
-    if data_format.lower() == "json":
-        return load_dict_from_json(path)
-    else:
-        print("Wrong data_format, allowed types are 'yaml' and 'json'.")
-
-
-
-def load_dict_from_json(path):
-    with open(path, "r") as fp:
-        return json.load(fp)
-
-def write_dict_to_yaml(path, data):
-    if not path.suffix.endswith(".yaml"):
-        new_path = path.with_suffix(path.suffix + ".yaml")
-    else:
-        new_path = path
-    with open(new_path, "w") as fp:
-        yaml.dump(data, fp, indent=2, width=79, default_flow_style=None)
-
-def write_dict_to_json(path, data):
-    new_path = path.with_suffix(path.suffix + ".json")
-    with open(new_path, "w") as fp:
-        json.dump(data, fp, indent=2)
 
 def load_parts_from_step_file(pathname, logger=None):
     assert pathname.exists()

@@ -11,8 +11,8 @@ import numpy as np
 import h5py
 import meshio
 
-# ── cadmesh ─────────────────────────────────────────────────────────────────
-from ..core.step_processor import StepProcessor
+# ── steptohdf5 ─────────────────────────────────────────────────────────────────
+from steptohdf5.core.step_processor import StepProcessor
 
 
 
@@ -33,7 +33,7 @@ def process_step_file_to_hdf5(
     output_dir
         Directory where the final ``<model>.hdf5`` is written.
     log_dir
-        Directory where :class:`cadmesh.core.StepProcessor` will store logs.
+        Directory where :class:`steptohdf5.core.StepProcessor` will store logs.
 
     Returns
     -------
@@ -241,3 +241,5 @@ def convert_data_to_hdf5(geometry_data, topology_data, stat_data, mesh_data, out
         print(f"Error accessing or writing to HDF5 file: {e}")
     except Exception as e:
         print(f"Unexpected error occurred: {e}")
+
+

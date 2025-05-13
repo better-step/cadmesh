@@ -19,8 +19,8 @@ from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Dir, gp_XYZ, gp_Pnt2d
 from OCC.Core.TopoDS import TopoDS_Vertex
 from OCC.Core.ShapeBuild import ShapeBuild_ReShape
 
-from OCCUtils.base import BaseObject
-from OCCUtils.Construct import make_vertex
+from .base import BaseObject
+from .Construct import make_vertex
 
 
 class Vertex(TopoDS_Vertex, BaseObject):
