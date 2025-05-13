@@ -35,10 +35,6 @@ def build_parser():
         "-j", "--jobs", type=int, default=1, metavar="N",
         help="Parallel workers when using --list.",
     )
-    p.add_argument(
-        "--no-mesh", action="store_true",
-        help="Skip surface-mesh extraction (faster/smaller).",
-    )
     return p
 
 
@@ -57,8 +53,7 @@ def main():
         h5 = convert_step(
             args.step_file,
             output_dir=out_dir,
-            log_dir=log_dir,
-            meshes=not args.no_mesh,
+            log_dir=log_dir
         )
         print(f"✓  {h5}")
         return

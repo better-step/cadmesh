@@ -43,13 +43,13 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
 import igl  # used by MeshBuilder
 
 # --- package ----------------------------------------------------------------
-from src.cadmesh.core.entity_mapper import EntityMapper
-from src.cadmesh.core.geometry_dict_builder import GeometryDictBuilder
-from src.cadmesh.core.topology_dict_builder import TopologyDictBuilder
-from src.cadmesh.core.statistics_dict_builder import extract_statistical_information
-from src.cadmesh.mesh.mesh_builder import MeshBuilder
-from src.cadmesh.utils.geometry import load_parts_from_step_file
-from src.cadmesh.utils.logging import setup_logger
+from ..core.entity_mapper import EntityMapper
+from ..core.geometry_dict_builder import GeometryDictBuilder
+from ..core.topology_dict_builder import TopologyDictBuilder
+from ..core.statistics_dict_builder import extract_statistical_information
+from ..mesh.mesh_builder import MeshBuilder
+from ..utils.geometry import load_parts_from_step_file
+from ..utils.logging import setup_logger
 
 
 # --------------------------------------------------------------------------- #

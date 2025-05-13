@@ -12,7 +12,7 @@ import h5py
 import meshio
 
 # ── cadmesh ─────────────────────────────────────────────────────────────────
-from src.cadmesh.core.step_processor import StepProcessor
+from ..core.step_processor import StepProcessor
 
 
 

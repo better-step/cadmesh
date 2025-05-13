@@ -15,9 +15,11 @@ from matplotlib.patches import Polygon
 import igl
 
 # CAD
-from src.cadmesh.core.entity_mapper import EntityMapper
-from src.cadmesh.core.topology_dict_builder import TopologyDictBuilder
-import src.cadmesh.utils.topology as topology_utils
+from cadmesh.core.entity_mapper import EntityMapper
+from cadmesh.core.topology_dict_builder import TopologyDictBuilder
+import cadmesh.utils.topology as topology_utils
+
+
 
 # PythonOCC
 from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
@@ -450,17 +452,31 @@ class TopologyDictBuilderUtest(unittest.TestCase):
                 
                     
 
-    def find_faces_for_body(output, body_index):
+    # def find_faces_for_body(output, body_index):
+    #     face_indices = set()
+    #     body_data = output["bodies"][body_index]
+    #     for region_index in body_data["regions"]:
+    #         region_data = output["regions"][region_index]
+    #         for shell_index in region_data["shells"]:
+    #             shell_data = output["shells"][shell_index]
+    #             for face in shell_face["faces"]:
+    #                 face_index = face["face_index"]
+    #                 face_indices.add(face_index)
+    #     return face_indices
+    def find_faces_for_body(self, output, body_index):
         face_indices = set()
+
         body_data = output["bodies"][body_index]
         for region_index in body_data["regions"]:
             region_data = output["regions"][region_index]
             for shell_index in region_data["shells"]:
                 shell_data = output["shells"][shell_index]
-                for face in shell_face["faces"]:
-                    face_index = face["face_index"]
-                    face_indices.add(face_index)
+                for face_use in shell_data["faces"]:
+                    # Each item in shell_data["faces"] is a face-use record
+                    face_indices.add(face_use["face_index"])
+
         return face_indices
+
 
 
     def check_face_list_for_body(
