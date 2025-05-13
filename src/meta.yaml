@@ -1,7 +1,7 @@
 
 package:
   name: "steptohdf5"
-  version: "0.1.0"
+  version: "v0.1.1"
 
 source:
   path: ..                # build from the root of your repo
