@@ -1,4 +1,4 @@
-name: cad
+name: steptohdf5
 channels:
   - conda-forge
 dependencies:

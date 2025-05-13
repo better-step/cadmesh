@@ -28,7 +28,7 @@ requirements:
 
 test:
   imports:
-    - cadmesh                            # internal import path
+    - steptohdf5
   commands:
     - steptohdf5 --help
 
