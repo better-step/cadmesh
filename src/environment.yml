@@ -2,11 +2,14 @@ name: steptohdf5
 channels:
   - conda-forge
 dependencies:
-  - numpy
-  - pythonocc-core==7.4.0
+  - python >=3.8
+  - numpy >=1.22
+  - pythonocc-core =7.4.0
   - igl
   - h5py
   - meshio
   - meshplot
   - joblib
   - tqdm
+  - pip                       # for editable installs
+  - steptohdf5  # once on conda-forge, remove local path installs

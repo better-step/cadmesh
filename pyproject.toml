@@ -1,3 +1,38 @@
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+# ------------------------------------------------------------------
+# PEP-621 metadata
+# ------------------------------------------------------------------
+[project]
+name = "steptohdf5"
+version = "0.1.1"
+description = "Convert STEP / STP CAD models to single-file HDF5 archives."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-only" }
+
+authors = [
+  { name = "Sai Chandra Madduri, Nafiseh Izadyar, Teseo Schneider", email = "teseo@uvic.ca" }
+]
+
+dependencies = [
+  "numpy>=1.22",
+  "h5py",
+  "meshio",
+  "meshplot",
+  "joblib",
+  "tqdm"
+]
+
+[project.optional-dependencies]
+occ   = ["pythonocc-core>=7.4.0"]
+full  = ["pythonocc-core>=7.4.0", "igl"]
+
+[project.scripts]
+steptohdf5 = "steptohdf5.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/better-step/cadmesh"
+Issues   = "https://github.com/better-step/cadmesh/issues"

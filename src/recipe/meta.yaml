@@ -1,0 +1,49 @@
+{% set name = "steptohdf5" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/better-step/cadmesh.git
+  git_rev: v0.2.0
+
+build:
+  noarch: python
+  # pip install respects pyproject.toml
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+  entry_points:
+    - steptohdf5 = steptohdf5.cli:main
+
+requirements:
+  host:
+    - python >=3.8
+    - pip
+  run:
+    - python >=3.8
+    - numpy >=1.22
+    - h5py
+    - meshio
+    - meshplot
+    - joblib
+    - tqdm
+    - pythonocc-core 7.4.0        # Open Cascade 7.4 wheels
+    - igl                         # geom predicates
+
+test:
+  imports:
+    - steptohdf5
+  commands:
+    - steptohdf5 --help
+
+about:
+  home: https://github.com/better-step/cadmesh
+  summary: Convert STEP / STP CAD models to single-file HDF5 archives.
+  license: GPL-3.0-only
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - itsmeechandu
