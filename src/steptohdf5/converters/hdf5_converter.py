@@ -12,7 +12,7 @@ import h5py
 import meshio
 
 # ── steptohdf5 ─────────────────────────────────────────────────────────────────
-from steptohdf5.core.step_processor import StepProcessor
+from ..core.step_processor import StepProcessor
 
 
 

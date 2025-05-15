@@ -36,7 +36,6 @@ setup(
         "numpy",
         "h5py",
         "meshio",
-        "meshplot",
         "joblib",
         "tqdm"
     ],

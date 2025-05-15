@@ -334,7 +334,7 @@ class Edge(TopoDS_Edge, BaseObject):
             print("Warning : GCPnts_UniformAbscissa failed")
         if npts.IsDone():
             tmp = []
-            for i in xrange(1, npts.NbPoints()+1):
+            for i in range(1, npts.NbPoints()+1):
                 param = npts.Parameter(i)
                 pnt = self.adaptor.Value(param)
                 tmp.append((param, pnt))
@@ -430,7 +430,7 @@ class Edge(TopoDS_Edge, BaseObject):
 
 if __name__ == '__main__':
     from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeBox
-    from OCCUtils.Topology import Topo
+    from .Topology import Topo
     b = BRepPrimAPI_MakeBox(10, 20, 30).Shape()
     t = Topo(b)
     ed = next(t.edges())
