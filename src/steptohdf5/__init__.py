@@ -12,7 +12,7 @@ PosixPath('out/Gear.h5')
 
 """
 from pathlib import Path
-from converters.hdf5_converter import process_step_file_to_hdf5
+from .converters.hdf5_converter import process_step_file_to_hdf5
 import sys
 if "src" in sys.modules and sys.modules["src"] is not None:
     raise ImportError(
