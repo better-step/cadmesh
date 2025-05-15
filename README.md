@@ -103,8 +103,7 @@ from cadmesh import convert_step   # cadmesh is the internal module name
 h5 = convert_step(
     "Gear.step",
     output_dir="out",
-    log_dir="logs",
-    meshes=True
+    log_dir="logs"
 )
 
 # Batch conversion --------------------------------------------------
@@ -113,8 +112,7 @@ ok, failed = batch_convert_step_files(
     input_list_path="models.txt",
     output_dir="out",
     log_dir="logs",
-    n_jobs=8,
-    produce_meshes=False
+    n_jobs=8
 )
 print(f"{len(ok)} done, {len(failed)} failed")
 ```
