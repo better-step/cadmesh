@@ -14,7 +14,7 @@ meshes – with a one-line CLI **or** a small Python API.
 [![CI status](https://github.com/better-step/cadmesh/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/better-step/cadmesh/actions)
 
 > **steptohdf5** turns CAD solids into analysis-ready data sets –
-> one HDF5 file per model, optionally including a high-quality surface mesh.
+> one HDF5 file per model, including a high-quality surface mesh.
 > It is a thin wrapper around [pythonocc-core 7.4.0](https://pypi.org/project/pythonocc-core/), `meshio`, and a few hundred lines of well-tested extraction logic.
 
 ---
@@ -25,7 +25,7 @@ meshes – with a one-line CLI **or** a small Python API.
 - **Face–triangle mapping**: trace every triangle back to its CAD face.
 - **CLI & Python API**: convert from a shell script *or* inside a Jupyter notebook.
 - **Batch-ready**: built-in parallel processing via `joblib` and progress bars with `tqdm`.
-- **Pure Python**: no C/C++ compilation (Open Cascade wheels included).
+
 
 ---
 
