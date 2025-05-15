@@ -16,6 +16,7 @@ from ..core.step_processor import StepProcessor
 
 
 
+
 def process_step_file_to_hdf5(
     step_file: str | Path,
     *,
@@ -60,18 +61,6 @@ def process_step_file_to_hdf5(
     statistics_data = sp.stat_data    or {}
     mesh_data = sp.mesh_data or []
 
-    # ── create mesh directory ───────────────────────────────────────────
-    # mesh_dir: Path
-    # if produce_meshes and sp.mesh_dir and sp.mesh_dir.is_dir():
-    #     mesh_dir = sp.mesh_dir
-    # else:
-    #     # create a *temporary* dir with one minimal OBJ
-    #     mesh_dir = out_dir / f"__dummy_mesh__{step_path.stem}"
-    #     mesh_dir.mkdir(exist_ok=True)
-    #     if not produce_meshes:
-    #         _create_minimal_obj(mesh_dir / "dummy.obj")
-
-
     h5_path = out_dir / f"{step_path.stem}.hdf5"
     convert_data_to_hdf5(
         geometry_data=geometry_data,
@@ -79,6 +68,7 @@ def process_step_file_to_hdf5(
         stat_data=statistics_data,
         mesh_data=mesh_data,
         output_file=str(h5_path),
+        version=sp.version,
     )
 
     return h5_path
@@ -159,84 +149,55 @@ def convert_stat_to_hdf5(data, group):
             group.create_dataset(key, data=value)
 
 
-def convert_data_to_hdf5(geometry_data, topology_data, stat_data, mesh_data, output_file):
+def convert_data_to_hdf5(geometry_data, topology_data, stat_data, mesh_data, output_file, version: str = "2.0"):
     # if not os.path.isdir(meshPath):
     #     print(f"The provided path '{meshPath}' is not a directory.")
     #     return
 
     try:
         with h5py.File(output_file, 'w') as hdf:
-            geometry_group = hdf.create_group('geometry')
-            convert_dict_to_hdf5(geometry_data, geometry_group)
 
-            topology_group = hdf.create_group('topology')
-            convert_dict_to_hdf5(topology_data, topology_group)
+            parts_group = hdf.create_group("parts")
+            parts_group.attrs["version"] = version
 
-            stat_group = hdf.create_group('stat')
-            convert_stat_to_hdf5(stat_data, stat_group)
+            n_parts = len(topology_data.get("parts", []))
 
-            mesh_group = hdf.create_group('mesh')
+            for i in range(n_parts):
+                topo = topology_data["parts"][i]
+                geo = geometry_data["parts"][i]
+                stat = stat_data["parts"][i]
+                meshes = mesh_data[i]
 
-            for index, mesh_obj in enumerate(mesh_data):
-                try:
-                    mesh = meshio.Mesh(points=mesh_obj['vertices'], cells=[("triangle", mesh_obj['faces'])])
-                    points = mesh.points
-                    cells = mesh.cells
-                    cell_data = mesh.cell_data
-                    mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
-                    mesh_subgroup.create_dataset('points', data=points)
-                    for cell in cells:
-                        cell_type = cell.type
-                        cell_indices = cell.data
-                        mesh_subgroup.create_dataset(cell_type, data=cell_indices)
+                part_grp = parts_group.create_group(f"part_{i + 1:03d}")
 
-                    for data_key, data_value in cell_data.items():
-                        if data_key == "obj:group_ids":
-                            data_key = "group_ids"
-                        if isinstance(data_value, list):
-                            mesh_subgroup.create_dataset(data_key, data=data_value)
-                        else:
-                            subgroup = mesh_subgroup.create_group(data_key)
-                            for field_key, field_value in data_value.items():
-                                subgroup.create_dataset(field_key, data=field_value)
-                except Exception as e:
-                         print(f"Error reading mesh object '{mesh_obj}': {e}")
+                # topology
+                topo_grp = part_grp.create_group("topology")
+                convert_dict_to_hdf5(topo, topo_grp)
 
-            if mesh_group.keys() == 0:
-                print(f"No mesh data found in the object '{mesh_data}'.")
-                raise ValueError(f"No mesh data found in the object '{mesh_data}'.")
+                # geometry
+                geo_grp = part_grp.create_group("geometry")
+                convert_dict_to_hdf5(geo, geo_grp)
 
-            # for index, mesh_file in enumerate(
-            #         sorted(f for f in os.listdir(meshPath) if os.path.isfile(os.path.join(meshPath, f)))):
-            #     if mesh_file.endswith(".obj"):
-            #         try:
-            #             mesh = meshio.read(os.path.join(meshPath, mesh_file))
-            #             points = mesh.points
-            #             cells = mesh.cells
-            #             cell_data = mesh.cell_data
-            #
-            #             mesh_subgroup = mesh_group.create_group(str(index).zfill(3))
-            #             mesh_subgroup.create_dataset('points', data=points)
-            #             for cell in cells:
-            #                 cell_type = cell.type
-            #                 cell_indices = cell.data
-            #                 mesh_subgroup.create_dataset(cell_type, data=cell_indices)
-            #
-            #             for data_key, data_value in cell_data.items():
-            #                 if data_key == "obj:group_ids":
-            #                     data_key = "group_ids"
-            #                 if isinstance(data_value, list):
-            #                     mesh_subgroup.create_dataset(data_key, data=data_value)
-            #                 else:
-            #                     subgroup = mesh_subgroup.create_group(data_key)
-            #                     for field_key, field_value in data_value.items():
-            #                         subgroup.create_dataset(field_key, data=field_value)
-            #         except Exception as e:
-            #             print(f"Error reading mesh file '{mesh_file}': {e}")
-            #
-            # if mesh_group.keys() == 0:
-            #     print(f"No mesh files found in the directory '{meshPath}'.")
-            #     raise ValueError(f"No mesh files found in the directory '{meshPath}'.")
+                # statistics
+                #stat_grp = part_grp.create_group("stat")
+                #convert_stat_to_hdf5(stat, stat_grp)
+
+                # meshes
+                mesh_grp = part_grp.create_group("mesh")
+                for j, mesh_obj in enumerate(meshes):
+                    msub = mesh_grp.create_group(f"{j:03d}")
+                    msub.create_dataset(
+                        "points",
+                        data=mesh_obj["vertices"],
+                        compression="gzip",
+                        compression_opts=9,
+                    )
+                    msub.create_dataset(
+                        "triangle",
+                        data=mesh_obj["faces"],
+                        compression="gzip",
+                        compression_opts=9,
+                    )
     except OSError as e:
         print(f"Error accessing or writing to HDF5 file: {e}")
     except Exception as e:

@@ -2,8 +2,8 @@
 from __future__ import annotations
 import argparse
 from pathlib import Path
-from .converters.hdf5_converter import process_step_file_to_hdf5 as convert_step
-from .utils.processing import batch_convert_step_files
+from converters.hdf5_converter import process_step_file_to_hdf5 as convert_step
+from utils.processing import batch_convert_step_files
 
 
 def build_parser():

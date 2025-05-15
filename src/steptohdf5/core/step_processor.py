@@ -83,10 +83,12 @@ class StepProcessor:
             geometry_builder=GeometryDictBuilder,
             mesh_builder=MeshBuilder,
             stats_builder=extract_statistical_information,
+            version: str = "2.0"
     ):
         self.step_file = Path(step_file).expanduser().absolute()
         self.output_dir = Path(output_dir).expanduser().absolute()
         self.log_dir = Path(log_dir).expanduser().absolute()
+        self.version = version
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -107,7 +109,7 @@ class StepProcessor:
         self.geometry_data: dict | None = None
         self.topology_data: dict | None = None
         self.stat_data: dict | None = None
-        self.mesh_data: list | None = None
+        self.mesh_data: list[list[dict]] | None = None
 
     #  self.mesh_dir: Path | None       = None
 
@@ -152,7 +154,7 @@ class StepProcessor:
 
         to_process = range(len(self.parts)) if indices is None else indices
 
-        topo, geo, stats, mesh_objs = [], [], [], []
+        topo, geo, stats, mesh_list = [], [], [], []
 
         # --- iterate parts -------------------------------------------------- #
         for idx in to_process:
@@ -173,19 +175,19 @@ class StepProcessor:
                 part = shfix.Shape()
 
             # run extraction pipeline for *one* part
-            t, g, s, m = self._process_part(part, mesh_deflection_rel)
+            t, g, _, m = self._process_part(part, mesh_deflection_rel)
             topo.append(t)
             geo.append(g)
-            stats.append(s)
-            mesh_objs.extend(m)
+            #stats.append(s)
+            mesh_list.append(m)
 
         # ------------------------------------------------------------------ #
         #  store results in public attrs
         # ------------------------------------------------------------------ #
-        self.topology_data = {"parts": topo, "version": "2.0"}
-        self.geometry_data = {"parts": geo, "version": "2.0"}
-        self.stat_data = {"parts": stats, "version": "2.0"}
-        self.mesh_data = mesh_objs
+        self.topology_data = {"parts": topo}
+        self.geometry_data = {"parts": geo}
+        self.stat_data = {"parts": stats}
+        self.mesh_data = mesh_list
 
         self.logger.info("Extraction complete")
 
@@ -208,7 +210,8 @@ class StepProcessor:
         geo_dict = geo_builder.build_dict_for_parts(part, self.logger)
 
         # Stats
-        stats_dict = self.stats_builder_fn(part, entity_mapper, self.logger)
+        #stats_dict = self.stats_builder_fn(part, entity_mapper, self.logger)
+        stats_dict = {}
 
         # Meshes
         if self.mesh_builder_cls is not None:
