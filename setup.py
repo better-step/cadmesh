@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="steptohdf5",
-    version="v0.1.1",
+    version="v0.2.1",
     description="Convert STEP and other CAD files to HDF5-based mesh archives",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

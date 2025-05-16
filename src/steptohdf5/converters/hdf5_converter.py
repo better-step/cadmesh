@@ -149,58 +149,98 @@ def convert_stat_to_hdf5(data, group):
             group.create_dataset(key, data=value)
 
 
-def convert_data_to_hdf5(geometry_data, topology_data, stat_data, mesh_data, output_file, version: str = "2.0"):
-    # if not os.path.isdir(meshPath):
-    #     print(f"The provided path '{meshPath}' is not a directory.")
-    #     return
-
+def convert_data_to_hdf5(
+    geometry_data,
+    topology_data,
+    stat_data,
+    mesh_data,
+    output_file,
+    version: str = "2.0"
+):
+    """
+    Convert geometry, topology, statistical, and mesh data into an HDF5 file.
+    Handles both nested (list of lists) and flat (single list) mesh_data.
+    """
     try:
         with h5py.File(output_file, 'w') as hdf:
-
+            # Create root group for parts and set version attribute
             parts_group = hdf.create_group("parts")
             parts_group.attrs["version"] = version
 
-            n_parts = len(topology_data.get("parts", []))
+            # Extract parts lists
+            topo_parts = topology_data.get("parts", [])
+            geo_parts = geometry_data.get("parts", [])
+            stat_parts = stat_data.get("parts", []) if stat_data and "parts" in stat_data else []
 
-            for i in range(n_parts):
-                topo = topology_data["parts"][i]
-                geo = geometry_data["parts"][i]
-                stat = stat_data["parts"][i]
-                meshes = mesh_data[i]
+            # Normalize mesh_data: allow flat list or nested
+            if not mesh_data:
+                mesh_parts = []
+            elif isinstance(mesh_data[0], dict):  # flat list of mesh dicts
+                mesh_parts = [mesh_data]
+            else:
+                mesh_parts = mesh_data
+
+            # Validate consistency
+            n_parts = len(topo_parts)
+            if len(geo_parts) < n_parts:
+                raise ValueError(
+                    f"Geometry data has {len(geo_parts)} parts, but topology has {n_parts}."
+                )
+            if len(mesh_parts) < n_parts:
+                raise ValueError(
+                    f"Mesh data has {len(mesh_parts)} parts, but topology has {n_parts}."
+                )
+
+            # Process each part
+            for i, topo in enumerate(topo_parts):
+                geo = geo_parts[i]
+                stat = stat_parts[i] if i < len(stat_parts) else None
+                meshes = mesh_parts[i]
 
                 part_grp = parts_group.create_group(f"part_{i + 1:03d}")
 
-                # topology
+                # Topology
                 topo_grp = part_grp.create_group("topology")
                 convert_dict_to_hdf5(topo, topo_grp)
 
-                # geometry
+                # Geometry
                 geo_grp = part_grp.create_group("geometry")
                 convert_dict_to_hdf5(geo, geo_grp)
 
-                # statistics
-                #stat_grp = part_grp.create_group("stat")
-                #convert_stat_to_hdf5(stat, stat_grp)
+                # Statistics
+                if stat is not None:
+                    stat_grp = part_grp.create_group("statistics")
+                    convert_dict_to_hdf5(stat, stat_grp)
 
-                # meshes
+                # Mesh
                 mesh_grp = part_grp.create_group("mesh")
                 for j, mesh_obj in enumerate(meshes):
-                    msub = mesh_grp.create_group(f"{j:03d}")
+                    # Create subgroup named as 3-digit index (001, 002, ...)
+                    mesh_name = f"{j + 1:03d}"
+                    msub = mesh_grp.create_group(mesh_name)
+
+                    # Save vertices and faces with gzip compression
+                    verts = mesh_obj.get("vertices")
+                    faces = mesh_obj.get("faces")
+                    if verts is None or faces is None:
+                        raise ValueError(
+                            f"Mesh object at part {i} index {j} missing 'vertices' or 'faces' key."
+                        )
                     msub.create_dataset(
-                        "points",
-                        data=mesh_obj["vertices"],
+                        "vertices",
+                        data=verts,
                         compression="gzip",
                         compression_opts=9,
                     )
                     msub.create_dataset(
-                        "triangle",
-                        data=mesh_obj["faces"],
+                        "faces",
+                        data=faces,
                         compression="gzip",
                         compression_opts=9,
                     )
-    except OSError as e:
-        print(f"Error accessing or writing to HDF5 file: {e}")
+    except (OSError, IOError) as e:
+        print(f"File I/O error writing '{output_file}': {e}")
     except Exception as e:
-        print(f"Unexpected error occurred: {e}")
+        print(f"Error converting data to HDF5: {e}")
 
 
