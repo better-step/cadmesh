@@ -98,7 +98,7 @@ ok, failed = batch_convert_step_files(
 #### ABS-HDF5 Python API (abs)
 
 ```python
-import abs
+from  abs import read_parts, sample_parts
 
 # Sample points + normals
 def compute_labels 126 (part , topo , points ):
@@ -106,9 +106,9 @@ def compute_labels 126 (part , topo , points ):
   else : return 0
 
 # Read parts from HDF5
-parts = abs.read_parts('hdf5/Model.hdf5')
+parts = read_parts('hdf5/Model.hdf5')
 
-P, S = sample_parts (parts , num_samples , compute_labels)
+P, S = sample_parts(parts, num_samples, compute_labels)
 
 ```
 
