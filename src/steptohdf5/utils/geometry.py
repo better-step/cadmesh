@@ -57,33 +57,6 @@ def write_dict_to_json(path, data):
     with open(new_path, "w") as fp:
         json.dump(data, fp, indent=2)
 
-def load_parts_from_step_file(pathname, logger=None):
-    assert pathname.exists()
-    step_reader = STEPControl_Reader()
-    status = step_reader.ReadFile(str(pathname))
-    if status == IFSelect_RetDone:  # check status
-        shapes = []
-        nr = 1
-        try:
-            while True:
-
-                ok = step_reader.TransferRoot(nr)
-                if not ok:
-                    break
-                _nbs = step_reader.NbShapes()
-                shapes.append(step_reader.Shape(nr))  # a compound
-                #assert not shape_to_return.IsNull()
-                nr += 1
-        except:
-            logger.error("Step transfer problem: %i"%nr)
-            #print("No Shape", nr)
-    else:
-        logger.error("Step reading problem.")
-        #raise AssertionError("Error: can't read file.")
-
-    logger.info("Loaded parts: %i"%len(shapes))
-    return shapes
-
 def get_tri_vertex_coord(mesh, index):
     return np.array(list(mesh.Node(index).Coord()))
 

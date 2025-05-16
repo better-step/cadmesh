@@ -1,5 +1,4 @@
-import os
-from utils.processing import process_step_files
+from steptohdf5.processing import process_step_files
 import argparse
 
 
