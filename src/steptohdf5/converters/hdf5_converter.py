@@ -170,7 +170,12 @@ def convert_data_to_hdf5(
             # Extract parts lists
             topo_parts = topology_data.get("parts", [])
             geo_parts = geometry_data.get("parts", [])
-            stat_parts = stat_data.get("parts", []) if stat_data and "parts" in stat_data else []
+            if isinstance(stat_data, dict) and "parts" in stat_data:
+                stat_parts = stat_data["parts"]
+            elif isinstance(stat_data, list):
+                stat_parts = stat_data
+            else:
+                stat_parts = []
 
             # Normalize mesh_data: allow flat list or nested
             if not mesh_data:
@@ -197,6 +202,21 @@ def convert_data_to_hdf5(
                 stat = stat_parts[i] if i < len(stat_parts) else None
                 meshes = mesh_parts[i]
 
+                stat = stat_parts[i] if i < len(stat_parts) else None
+
+                # Determine face-level stats and any remaining stat fields
+                if isinstance(stat, dict):
+                    face_stats = stat.get("faces", [])
+                elif isinstance(stat, list):
+                    face_stats = stat
+                else:
+                    face_stats = []
+
+                # Merge stats into topology faces
+                for j, face in enumerate(topo.get("faces", [])):
+                    if j < len(face_stats) and isinstance(face, dict):
+                        face.update(face_stats[j])
+
                 part_grp = parts_group.create_group(f"part_{i + 1:03d}")
 
                 # Topology
@@ -208,15 +228,16 @@ def convert_data_to_hdf5(
                 convert_dict_to_hdf5(geo, geo_grp)
 
                 # Statistics
-                if stat is not None:
-                    stat_grp = part_grp.create_group("statistics")
-                    convert_dict_to_hdf5(stat, stat_grp)
+
+                # if stat is not None:
+                #     stat_grp = part_grp.create_group("statistics")
+                #     convert_dict_to_hdf5(stat, stat_grp)
 
                 # Mesh
                 mesh_grp = part_grp.create_group("mesh")
                 for j, mesh_obj in enumerate(meshes):
                     # Create subgroup named as 3-digit index (001, 002, ...)
-                    mesh_name = f"{j + 1:03d}"
+                    mesh_name = f"{j:03d}"
                     msub = mesh_grp.create_group(mesh_name)
 
                     # Save vertices and faces with gzip compression

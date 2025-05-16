@@ -175,10 +175,10 @@ class StepProcessor:
                 part = shfix.Shape()
 
             # run extraction pipeline for *one* part
-            t, g, _, m = self._process_part(part, mesh_deflection_rel)
+            t, g, s, m = self._process_part(part, mesh_deflection_rel)
             topo.append(t)
             geo.append(g)
-            #stats.append(s)
+            stats.append(s)
             mesh_list.append(m)
 
         # ------------------------------------------------------------------ #
@@ -210,8 +210,8 @@ class StepProcessor:
         geo_dict = geo_builder.build_dict_for_parts(part, self.logger)
 
         # Stats
-        #stats_dict = self.stats_builder_fn(part, entity_mapper, self.logger)
-        stats_dict = {}
+        stats_dict = self.stats_builder_fn(part, entity_mapper, self.logger)
+
 
         # Meshes
         if self.mesh_builder_cls is not None:
