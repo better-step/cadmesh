@@ -17,6 +17,12 @@ COPY pyproject.toml .
 COPY src ./src
 RUN pip install --no-cache-dir .
 
+# ensure Python sees it
+ENV PYTHONPATH=/app/src
+
+# run as module
+ENTRYPOINT ["python", "-m", "steptohdf5.cloud_conversion"]
+
 ##############################################################################
 # ---------- Stage 1: slim runtime ------------------------------------------
 FROM condaforge/mambaforge:23.11.0-0 AS runtime
