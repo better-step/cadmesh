@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 # ------------------------------------------------------------------
 [project]
 name = "steptohdf5"
-version = "0.2.5"
+version = "0.2.6"
 description = "Convert STEP / STP CAD models to single-file HDF5 archives."
 readme = "README.md"
 requires-python = ">=3.8"
