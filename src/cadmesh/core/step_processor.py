@@ -16,7 +16,7 @@ import igl
 from pathlib import Path
 import logging
 import h5py
-from Hda5_Converter import *
+from ..hdf5_converter import *
 
 
 
