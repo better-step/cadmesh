@@ -1,2 +1,0 @@
-# cadmesh
-Mesh CAD files.
