@@ -20,17 +20,6 @@ This README will cover the installation of both tools, then walk through the con
 
 ## Installation
 
-### steptohdf5 (via Docker)
-
-Since **steptohdf5** is not yet on PyPI or Conda, the easiest way to use it is through its Docker image (which comes with all required dependencies, such as OpenCASCADE). Ensure you have Docker installed, then pull the steptohdf5 image from the registry:
-
-```bash
-docker pull itsmechandu/steptohdf5:latest
-```
-
-
-> **Note:** steptohdf5 relies on OpenCASCADE (via `pythonocc-core` 7.4.0) for CAD B-rep processing and uses `meshio` for mesh generation. The Docker image has these pre-installed, so you don't need to install anything else on your host.
-
 ### ABS-HDF5 (via pip)
 
 **ABS-HDF5** is distributed on PyPI. Install it into your Python environment (we recommend using a virtual environment):
@@ -45,67 +34,7 @@ This installs the `abs` Python package along with two CLI tools: `abs-to-ply` an
 
 ---
 
-## Usage: Conversion and Sampling Pipeline
-
-### 1. Convert STEP → HDF5 using steptohdf5
-
-Run the Docker container with your input and output folders bind-mounted:
-
-```bash
-docker run --rm \
-  -v /path/to/cad_workspace:/workspace \
-  -w /workspace \
-  itsmechandu/steptohdf5:latest \
-  steptohdf5 <input.step> -o hdf5 -l logs
-
-docker run --rm \
-  -v /path/to/cad_workspace:/workspace \
-  -w /workspace \
-  itsmechandu/steptohdf5:latest \
-  <input.step> \
-  -o output \
-  -l logs
-```
-
-- `<input.step>`: Path inside `/workspace`, e.g., `cad_files/Model.step`.  
-- `-o hdf5`: Output folder for `.hdf5` files (inside `/workspace`).  
-- `-l logs`: Folder for log files.
-
-**Single-file example:**
-
-```bash
-mkdir -p ~/cad_jobs/{cad_files,hdf5,logs}
-cp MyModel.step ~/cad_jobs/cad_files/
-cd ~/cad_jobs
-docker run --rm \
-  -v "$PWD":/workspace \
-  -w /workspace \
-  itsmechandu/steptohdf5:latest \
-  steptohdf5 cad_files/MyModel.step -o hdf5 -l logs
-
-```
-
-After running, you’ll have:
-```
-~/cad_jobs/hdf5/MyModel.hdf5
-~/cad_jobs/logs/MyModel.log
-```
-
-**Batch conversion with a list:**
-
-```bash
-ls cad_files/*.step > cad_files/list.txt
-docker run --rm \
-  -v "$PWD":/workspace \
-  -w /workspace \
-  itsmechandu/steptohdf5:latest \
-  steptohdf5 --list cad_files/list.txt -o hdf5 -l logs -j 4
-
-```
-
----
-
-### 2. Sample HDF5 → Point Cloud using ABS-HDF5
+### Sample HDF5 → Point Cloud using ABS-HDF5
 
 With ABS-HDF5 installed, use the `abs-to-ply` CLI to generate PLY point clouds from HDF5:
 
