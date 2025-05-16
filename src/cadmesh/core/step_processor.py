@@ -3,7 +3,7 @@ from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
 from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 from OCC.Extend.TopologyUtils import TopologyExplorer, WireExplorer
-from OCCUtils.Topology import Topo, dumpTopology
+# from OCCUtils.Topology import Topo, dumpTopology
 from OCC.Core.TopLoc import TopLoc_Location
 from OCC.Core.BRepAdaptor import BRepAdaptor_Curve, BRepAdaptor_Surface
 from OCC.Core.BRep import BRep_Tool
