@@ -9,8 +9,7 @@ import os
 from joblib import Parallel, delayed
 
 
-
-from ..core.step_processor import StepProcessor
+from .core.step_processor import StepProcessor
 
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):

@@ -1,22 +1,10 @@
 from OCC.Core.STEPControl import STEPControl_Reader
-from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
-from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
-from OCC.Extend.TopologyUtils import TopologyExplorer, WireExplorer
+from OCC.Core.IFSelect import IFSelect_RetDone
 # from OCCUtils.Topology import Topo, dumpTopology
-from OCC.Core.TopLoc import TopLoc_Location
-from OCC.Core.BRepAdaptor import BRepAdaptor_Curve, BRepAdaptor_Surface
-from OCC.Core.BRep import BRep_Tool
-from OCC.Core.gp import gp_Pnt, gp_Vec, gp_Pnt2d
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
-from OCC.Core.BRepTools import breptools_UVBounds
 from OCC.Core.ShapeFix import ShapeFix_Shape as _ShapeFix_Shape
-import os
-import igl
-from pathlib import Path
 import logging
-import h5py
-from ..hdf5_converter import *
+from .hdf5_converter import convert_dict_to_hdf5
 
 
 
@@ -24,9 +12,8 @@ from .entity_mapper import EntityMapper
 from .geometry_dict_builder import GeometryDictBuilder
 from .topology_dict_builder import TopologyDictBuilder
 from .statistics_dict_builder import extract_statistical_information
-from ..mesh.mesh_builder import MeshBuilder
-from ..utils.geometry import load_parts_from_step_file, write_dictionary_to_file
-from ..utils.my_logging import setup_logger
+from .mesh_builder import MeshBuilder
+
 
 class StepProcessor:
     """
@@ -252,3 +239,31 @@ class StepProcessor:
             meshes = []
 
         return topo_dict, geo_dict, meshes, stats_dict
+
+
+def load_parts_from_step_file(pathname, logger=None):
+    assert pathname.exists()
+    step_reader = STEPControl_Reader()
+    status = step_reader.ReadFile(str(pathname))
+    if status == IFSelect_RetDone:  # check status
+        shapes = []
+        nr = 1
+        try:
+            while True:
+
+                ok = step_reader.TransferRoot(nr)
+                if not ok:
+                    break
+                _nbs = step_reader.NbShapes()
+                shapes.append(step_reader.Shape(nr))  # a compound
+                #assert not shape_to_return.IsNull()
+                nr += 1
+        except:
+            logger.error("Step transfer problem: %i"%nr)
+            #print("No Shape", nr)
+    else:
+        logger.error("Step reading problem.")
+        #raise AssertionError("Error: can't read file.")
+
+    logger.info("Loaded parts: %i"%len(shapes))
+    return shapes
