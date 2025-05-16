@@ -1,15 +1,7 @@
 import os
-import cadmesh
+from utils.processing import process_step_files
 import argparse
-from .hdf5_converter import *
-from pathlib import Path
-import os
-import glob
-import shutil
-import tempfile
-import multiprocessing
-import subprocess
-from tqdm import tqdm
+
 
 
 def main():
@@ -20,7 +12,7 @@ def main():
         parser.add_argument("--hdf5_file", help="Path to the HDF5 file where results will be saved.")
         args = parser.parse_args()
 
-        success, failed = cadmesh.utils.processing.process_step_files(args.input, args.output, args.log)
+        success, failed = process_step_files(args.input, args.output, args.log)
         print(f"Successful conversions: {success}")
         print(f"Failed conversions: {failed}")
 

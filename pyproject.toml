@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ------------------------------------------------------------------
+# PEP-621 metadata
+# ------------------------------------------------------------------
+[project]
+name = "steptohdf5"
+version = "0.2.4"
+description = "Convert STEP and other CAD files to HDF5-based mesh archives"
+readme = "README.md"
+requires-python = ">=3.8"
+readme-content-type = "text/markdown"
+license = { text = "GPL-3.0" }
+authors = [
+  { name = "Sai Chandra Madduri, Nafiseh Izadyar, Teseo Schneider", email = "teseo@uvic.ca" }
+]
+[project.urls]
+Homepage = "https://github.com/better-step/cadmesh"
+Issues   = "https://github.com/better-step/cadmesh/issues"
+
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3.8",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+  "numpy",
+  "h5py",
+  "meshio",
+  "joblib",
+  "tqdm"
+]
+
+[project.optional-dependencies]
+occ = ["pythonocc-core>=7.4.0"]
+
+[project.scripts]
+steptohdf5 = "steptohdf5.cloud_conversion:main"

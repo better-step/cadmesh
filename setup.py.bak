@@ -45,7 +45,7 @@ setup(
     # point at your real 'main' function
     entry_points={
         "console_scripts": [
-            "steptohdf5 = cadmesh.cloud_conversion:main",
+            "steptohdf5 = steptohdf5.cloud_conversion:main",
         ],
     }
 )

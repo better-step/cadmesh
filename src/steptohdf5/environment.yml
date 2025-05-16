@@ -1,12 +1,9 @@
-name: cad
+name: steptohdf5
 channels:
   - conda-forge
 dependencies:
   - numpy
   - pythonocc-core
-  - jupyter
-  - igl
-  - pyyaml
   - meshplot
   - joblib
   - h5py
