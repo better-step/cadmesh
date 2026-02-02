@@ -3,14 +3,12 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main
-      - master
+      - stable
     tags:
       - 'v*.*.*'
   pull_request:
     branches:
-      - main
-      - master
+      - stable
   workflow_dispatch:  # Allow manual trigger
 
 env:
