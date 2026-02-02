@@ -5,6 +5,8 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert
 from OCC.Core.ShapeFix import ShapeFix_Shape as _ShapeFix_Shape
 import logging
 import os
+import h5py
+from pathlib import Path
 from .hdf5_converter import convert_dict_to_hdf5
 
 
