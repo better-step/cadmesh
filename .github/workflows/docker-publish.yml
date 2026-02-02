@@ -2,14 +2,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches:
-      - stable
     tags:
-      - 'v*.*.*'
-  pull_request:
-    branches:
-      - stable
-  workflow_dispatch:  # Allow manual trigger
+      - 'v*.*.*'  # Only trigger on version tags
+  workflow_dispatch:  # Allow manual trigger  # Allow manual trigger
 
 env:
   DOCKER_IMAGE: itsmechandu/steptohdf5
