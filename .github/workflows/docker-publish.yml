@@ -37,14 +37,16 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
-            # Tag as 'latest' for pushes to main/master branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Tag with version for tagged releases (e.g., v0.2.7 -> 0.2.7)
+            # Tag as 'latest' for pushes to stable branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/stable' }}
+            # Tag with full version for version tags (e.g., v0.2.7 -> 0.2.7)
             type=semver,pattern={{version}}
-            # Tag with major.minor for tagged releases (e.g., v0.2.7 -> 0.2)
+            # Tag with major.minor for version tags (e.g., v0.2.7 -> 0.2)
             type=semver,pattern={{major}}.{{minor}}
-            # Tag with SHA for all commits
-            type=sha,prefix={{branch}}-
+            # Tag with major only for version tags (e.g., v0.2.7 -> 0)
+            type=semver,pattern={{major}}
+            # Tag with SHA for branch pushes only (not for tags)
+            type=sha,format=short,prefix=stable-,enable=${{ github.ref == 'refs/heads/stable' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
